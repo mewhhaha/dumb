@@ -27,9 +27,7 @@ jobs:
 
       - name: Publish all packages
         run: |
-          git status
           pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
-          git status
-          pnpm -r publish --tag latest --access public --publish-branch origin/main
+          pnpm -r publish --tag latest --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
