@@ -15,7 +15,12 @@
     "prepublish": "pnpm build",
     "build": "tsc --project ./tsconfig.json"
   },
-  "keywords": [],
+  "keywords": [
+    "Durable Object",
+    "WebSocket",
+    "Utility",
+    "Cloudflare"
+  ],
   "author": "",
   "devDependencies": {
     "typescript": "^4.9.4",
