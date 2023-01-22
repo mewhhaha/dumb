@@ -1,6 +1,7 @@
 {
   "name": "dumb-durable-object",
   "version": "0.0.1",
+  "license": "MIT",
   "description": "This is a package to make it easier to do rpc with your durable object by adding ways of typing and calling endpoints",
   "module": "dist/index.js",
   "type": "module",
@@ -16,7 +17,6 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
   "devDependencies": {
     "typescript": "^4.9.4",
     "@cloudflare/workers-types": "^4.20221111.1"
