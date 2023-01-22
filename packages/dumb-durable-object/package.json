@@ -21,7 +21,7 @@
     "Utility",
     "Cloudflare"
   ],
-  "author": "",
+  "author": "Jacob Torrång",
   "devDependencies": {
     "typescript": "^4.9.4",
     "@cloudflare/workers-types": "^4.20221111.1"
