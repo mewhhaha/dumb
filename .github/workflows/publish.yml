@@ -27,7 +27,7 @@ jobs:
 
       - name: Publish all packages
         run: |
-          git diff
+          git status
           pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
           pnpm -r publish --tag latest --access public
         env:
