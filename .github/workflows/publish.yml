@@ -25,5 +25,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name:
+
       - name: Publish all packages
-        run: pnpm -r publish --token {{ secrets.PUBLISH_TOKEN }}
+        run: |
+          pnpm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
+          pnpm -r publish --tag latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
