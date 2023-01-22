@@ -1,0 +1,29 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    name: Publish packages to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7
+
+      - name: Use Node.js 18.13.0
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.13.0
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Publish all packages
+        run: pnpm -r publish --token {{ secrets.PUBLISH_TOKEN }}
