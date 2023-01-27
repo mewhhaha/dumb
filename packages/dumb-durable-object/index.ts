@@ -251,11 +251,14 @@ export class CallableDurableObject<Env = unknown> implements DurableObject {
   }
 }
 
-export function callable<
+export const callable = <
   F extends (
     request: Request,
     ...args: any[]
   ) => TypedResponse<any, any> | Promise<TypedResponse<any, any>>
->(originalMethod: F, _: ClassMethodDecoratorContext) {
+>(
+  originalMethod: F,
+  _: ClassMethodDecoratorContext
+) => {
   return originalMethod;
-}
+};
