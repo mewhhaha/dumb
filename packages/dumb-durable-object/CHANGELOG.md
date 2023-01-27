@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `typescript` to be of version `5.0.0`
 
 ### Added
+- Added type called `Callable` that has the function signature which is required for class functions to match in order for the client to pick them up
 - Added decorator called `@callable` that you can use to ensure the type signature of your function is correct.
 ```tsx
 class DurableObjectExample extends CallableDurableObject {
