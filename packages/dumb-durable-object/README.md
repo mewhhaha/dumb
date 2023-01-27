@@ -9,8 +9,7 @@ This is a simple example using the library.
 // In your worker most likely
 class DurableObjectExample extends CallableDurableObject {
   @callable // Decorator that ensures the type signature required for it to be callable
-  helloWorld(_: Request, name: string) { 
-
+  helloWorld(_: Request, name: string) {
     return respond(`Hello world, ${name}!`);
   }
 }
@@ -29,9 +28,9 @@ export async function onRequest({
 }) {
   const id = "MY_DO_ID"; // Could also be a DurableObjectId
   const c = client(request, env.DO_EXAMPLE, id);
-  const result = await c.helloWorld("MY NAME");
+  const [value] = await c.helloWorld("MY NAME"); // Absence of error makes it easy deconstruct the value
 
-  return new Response(result.value, { status: 200 });
+  return new Response(value, { status: 200 });
 }
 ```
 
@@ -39,7 +38,7 @@ export async function onRequest({
 ```ts
 // In your worker most likely
 class DurableObjectExample extends CallableDurableObject {
-  @callable  // Decorator that ensures the type signature required for it to be callable
+  @callable // Decorator that ensures the type signature required for it to be callable
   helloWorld(_: Request, name: string) {
     if (name === "") {
       return error(422, { message: "Your name was empty!" });
@@ -62,14 +61,15 @@ export async function onRequest({
 }) {
   const id = "MY_DO_ID"; // Could also be a DurableObjectId
   const c = client(request, env.DO_EXAMPLE, id);
-  const result = await c.helloWorld("MY NAME");
+  const [value, error] = await c.helloWorld("MY NAME");
 
   // Since it might return an error we have to disambiguate
-  if (result.error) {
-    return new Response(result.value.message, { status: result.status });
+  if (error) {
+    // value is of type { message: string }
+    return new Response(value.message, { status: error.status }); // Notice we get the error value here
   }
 
-  // The successful path
-  return new Response(result.value, { status: 200 });
+  // value is of type string
+  return new Response(value, { status: 200 }); // Notice we get the successful value here
 }
 ```

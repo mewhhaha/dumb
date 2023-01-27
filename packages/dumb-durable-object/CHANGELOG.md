@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Changed result to be of a tuple of `[VALUE, ERROR]` instead of the previous object variant.
+```tsx
+// This allows you to quickly rename the value instead of having to do `{ value: name }`
+const [value] = c.helloWorld("MY NAME")
+
+// TypeScript is smart enough that when we check error, we can also validate what value is
+const [value, error] = c.helloWorld("MY NAME")
+if (error) {
+  // value is error value here
+} else {
+  // value is successful value here
+}
+```
+- Changed error be more opaque with the type `ResultError` which is an interface. Previously the return type would blow up because of all the HTTP status codes that were possible.
+
 ## [0.0.3] - 2022-01-27
 
 ### Changed

@@ -259,27 +259,22 @@ const call = async <
 
   if (!response.ok) {
     // @ts-ignore
-    return {
-      error: true,
-      status: response.status,
-      value: await response.json(),
-    };
+    return [await response.json(), { status: response.status }];
   }
 
   // @ts-ignore
-  return {
-    error: false,
-    value: await response.json(),
-  };
+  return [await response.json(), null];
 };
 
-type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export interface ResultError {
+  status: HttpsStatusCode<4 | 5>;
+}
 
-type HttpsStatusCode<D extends 2 | 3 | 4 | 5> =
+export type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
+export type HttpsStatusCode<D extends 2 | 3 | 4 | 5> =
   `${D}${Digit}${Digit}` extends `${infer N extends number}` ? N : never;
 
-type Result<R, E> = [E] extends [never]
-  ? { error: false; value: R }
-  :
-      | { error: false; value: R }
-      | { error: true; status: HttpsStatusCode<4 | 5>; value: E };
+export type Result<R, E> = [E] extends [never]
+  ? [success: R, error: null]
+  : [success: R, error: null] | [failure: E, error: ResultError];
