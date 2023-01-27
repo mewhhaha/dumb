@@ -67,10 +67,6 @@ export type Serialized<T> = T extends string | null | number | boolean
 
 export type TypedResponse<VALUE, ERROR> = Response & { __t: VALUE; __e: ERROR };
 
-type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-type HttpsStatusCode<D extends 2 | 3 | 4 | 5> =
-  `${D}${Digit}${Digit}` extends `${infer N extends number}` ? N : never;
-
 export const respond = <VALUE>(
   value: VALUE
 ): TypedResponse<Serialized<VALUE>, never> =>
@@ -93,9 +89,7 @@ export type DurableObjectNamespaceIs<
 
 export type External<A extends Record<string, any>> = Extract<
   {
-    [Key in keyof A]: A[Key] extends (
-      ...args: [Request, ...infer R]
-    ) => Promise<TypedResponse<any, any>> | TypedResponse<any, any>
+    [Key in keyof A]: A[Key] extends Callable<infer R>
       ? [R] extends [Serialized<R>]
         ? Key
         : never
@@ -103,12 +97,6 @@ export type External<A extends Record<string, any>> = Extract<
   }[Exclude<keyof A, keyof CallableDurableObject<any>>],
   string
 >;
-
-type Result<R, E> = [E] extends [never]
-  ? { error: false; value: R }
-  :
-      | { error: false; value: R }
-      | { error: true; status: HttpsStatusCode<4 | 5>; value: E };
 
 export type Client<ClassDO extends Record<string, any>> = {
   readonly request: { url: string; headers: Headers };
@@ -175,6 +163,70 @@ export const client = <ClassDO extends CallableDurableObject<any>>(
 export type Tail<T> = T extends [any, ...infer Rest] ? Rest : never;
 
 /**
+ * @example
+ * Functions that return values using `respond` or `error` will be picked up as a callable interface
+ *
+ * ```tsx
+ * class DurableObjectExample extends CallableDurableObject {
+ *  @callable
+ *  f(_: Request, value: string) {
+ *    return respond(value)
+ *  }
+ * }
+ * ```
+ */
+export class CallableDurableObject<Env = unknown> implements DurableObject {
+  protected state: DurableObjectState;
+  protected env: Env;
+  constructor(state: DurableObjectState, env: Env) {
+    this.state = state;
+    this.env = env;
+  }
+
+  async fetch(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    const [method] = url.pathname.split("/").slice(1);
+    const args = await request.json();
+
+    // @ts-expect-error Here we go!
+    return await this[method](request, ...args);
+  }
+}
+
+export type Callable<
+  ARGUMENTS extends any[] = any[],
+  VALUE = any,
+  ERROR = any
+> = (
+  request: Request,
+  ...args: ARGUMENTS
+) => TypedResponse<VALUE, ERROR> | Promise<TypedResponse<VALUE, ERROR>>;
+
+/** decorator for functions in classes to ensure the type signature
+ * matches that which is expected from the client
+ * @example
+ * The `callable` decorators are escaped with a backslash. Do not include that in your code.
+ *
+ * ```tsx
+ *  \@callable
+ *  notWorking(_: string, value: string) { // Gives error since it doesn't match the type
+ *    return respond(value)
+ *  }
+ *
+ *  \@callable
+ *  working(_: Request, value: string) { // Doesn't give error since it matches the type
+ *    return respond(value)
+ *  }
+ * ```
+ * */
+export const callable = <F extends Callable>(
+  originalMethod: F,
+  _: ClassMethodDecoratorContext
+) => {
+  return originalMethod;
+};
+
+/**
  *
  * @example
  * ```tsx
@@ -221,44 +273,13 @@ const call = async <
   };
 };
 
-/**
- * @example
- * Functions that return values using `respond` or `error` will be picked up as a callable interface
- *
- * ```tsx
- * class DurableObjectExample extends CallableDurableObject {
- *  f(_: Request, value: string) {
- *    return respond(value)
- *  }
- * }
- * ```
- */
-export class CallableDurableObject<Env = unknown> implements DurableObject {
-  protected state: DurableObjectState;
-  protected env: Env;
-  constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.env = env;
-  }
+type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const [method] = url.pathname.split("/").slice(1);
-    const args = await request.json();
+type HttpsStatusCode<D extends 2 | 3 | 4 | 5> =
+  `${D}${Digit}${Digit}` extends `${infer N extends number}` ? N : never;
 
-    // @ts-expect-error Here we go!
-    return await this[method](request, ...args);
-  }
-}
-
-export const callable = <
-  F extends (
-    request: Request,
-    ...args: any[]
-  ) => TypedResponse<any, any> | Promise<TypedResponse<any, any>>
->(
-  originalMethod: F,
-  _: ClassMethodDecoratorContext
-) => {
-  return originalMethod;
-};
+type Result<R, E> = [E] extends [never]
+  ? { error: false; value: R }
+  :
+      | { error: false; value: R }
+      | { error: true; status: HttpsStatusCode<4 | 5>; value: E };
