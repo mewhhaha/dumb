@@ -250,3 +250,12 @@ export class CallableDurableObject<Env = unknown> implements DurableObject {
     return await this[method](request, ...args);
   }
 }
+
+export function callable<
+  F extends (
+    request: Request,
+    ...args: any[]
+  ) => TypedResponse<any, any> | Promise<TypedResponse<any, any>>
+>(originalMethod: F, _: ClassMethodDecoratorContext) {
+  return originalMethod;
+}

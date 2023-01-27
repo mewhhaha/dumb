@@ -8,8 +8,7 @@ This is a simple example using the library.
 ```ts
 // In your worker most likely
 class DurableObjectExample extends CallableDurableObject {
-  // Arguments have to be JSON compatible values
-  // Important that this takes request as the first argument
+  @callable // Decorator that ensures the type signature required for it to be callable
   helloWorld(_: Request, name: string) { 
 
     return respond(`Hello world, ${name}!`);
@@ -40,8 +39,7 @@ export async function onRequest({
 ```ts
 // In your worker most likely
 class DurableObjectExample extends CallableDurableObject {
-  // Arguments have to be JSON compatible values
-  // Important that this takes request as the first argument
+  @callable  // Decorator that ensures the type signature required for it to be callable
   helloWorld(_: Request, name: string) {
     if (name === "") {
       return error(422, { message: "Your name was empty!" });

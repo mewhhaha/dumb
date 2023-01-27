@@ -30,8 +30,8 @@
     "Cloudflare"
   ],
   "devDependencies": {
-    "typescript": "^4.9.4",
-    "@cloudflare/workers-types": "^4.20221111.1"
+    "@cloudflare/workers-types": "^4.20221111.1",
+    "typescript": "5.0.0-beta"
   },
   "engines": {
     "node": ">=18.13.0",

@@ -12,6 +12,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed title in `README.md` to match package name.
 - Changed `CHANGELOG.md` formatting to prefix with `Added`, `Changed` and so on.
 - Changed `CHANGELOG.md` to have proper punctuation for list items.
+- Changed `typescript` to be of version `5.0.0`
+
+### Added
+- Added decorator called `@callable` that you can use to ensure the type signature of your function is correct.
+```tsx
+class DurableObjectExample extends CallableDurableObject {
+  @callable  // Decorator that ensures the type signature required for it to be callable
+  helloWorld(_: Request, name: string) {
+    if (name === "") {
+      return error(422, { message: "Your name was empty!" });
+    }
+    return respond(`Hello world, ${name}!`);
+  }
+}
+```
 
 
 ## [0.0.2] - 2022-01-26
