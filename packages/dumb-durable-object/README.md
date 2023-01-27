@@ -30,7 +30,7 @@ export async function onRequest({
 }) {
   const id = "MY_DO_ID"; // Could also be a DurableObjectId
   const c = client(request, env.DO_EXAMPLE, id);
-  const { value } = await c.helloWorld("MY NAME");
+  const result = await c.helloWorld("MY NAME");
 
   return new Response(result.value, { status: 200 });
 }
