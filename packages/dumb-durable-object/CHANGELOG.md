@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+...
+
+## [0.0.5] - 2022-01-28
+
+- Changed error value to reside in error, and instead have the undefined be the canonical value for success.
+```tsx
+const [value, error] = c.helloWorld("MY NAME")
+if (error) {
+  // value is undefined here
+  // error has status + any value that was passed on in { value }
+} else {
+  // value is successful value here
+  // error is undefined
+}
+```
+
+## [0.0.4] - 2022-01-27
+
 - Changed result to be of a tuple of `[VALUE, ERROR]` instead of the previous object variant.
 ```tsx
 // This allows you to quickly rename the value instead of having to do `{ value: name }`

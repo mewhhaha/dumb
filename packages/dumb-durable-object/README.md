@@ -66,7 +66,7 @@ export async function onRequest({
   // Since it might return an error we have to disambiguate
   if (error) {
     // value is of type { message: string }
-    return new Response(value.message, { status: error.status }); // Notice we get the error value here
+    return new Response(error.value.message, { status: error.status }); // Notice we get the error value here
   }
 
   // value is of type string
