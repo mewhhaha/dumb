@@ -61,12 +61,12 @@ export async function onRequest({
 }) {
   const id = "MY_DO_ID"; // Could also be a DurableObjectId
   const c = client(request, env.DO_EXAMPLE, id);
-  const [value, error] = await c.helloWorld("MY NAME");
+  const [value, err] = await c.helloWorld("MY NAME");
 
   // Since it might return an error we have to disambiguate
-  if (error) {
+  if (err !== null) {
     // value is of type { message: string }
-    return new Response(error.value.message, { status: error.status }); // Notice we get the error value here
+    return new Response(err.value.message, { status: err.status }); // Notice we get the error value here
   }
 
   // value is of type string

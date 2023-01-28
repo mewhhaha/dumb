@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.6] - 2022-01-29
+
+### Changed
+
+- Changed canonical missing value for `value` and `error` from `undefined` to `null` so that the pattern can more reasily be replicated in other parts where there is a serialization boundary. 
+
 ## [0.0.5] - 2022-01-28
+
+### Changed
 
 - Changed error value to reside in error, and instead have the undefined be the canonical value for success.
 ```tsx
@@ -24,6 +32,8 @@ if (error) {
 ```
 
 ## [0.0.4] - 2022-01-27
+
+### Changed
 
 - Changed result to be of a tuple of `[VALUE, ERROR]` instead of the previous object variant.
 ```tsx
@@ -50,6 +60,7 @@ if (error) {
 - Changed `typescript` to be of version `5.0.0`
 
 ### Added
+
 - Added type called `Callable` that has the function signature which is required for class functions to match in order for the client to pick them up
 - Added decorator called `@callable` that you can use to ensure the type signature of your function is correct.
 ```tsx
