@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.7] - 2022-02-12
+
+### Removed
+- Removed `ws` function. It is moved to the `dumb-durable-websocket` package.
+
+### Changed
+- Changed path for callable objects to be under `/__dumb__/` to allow for other custom methods to be called.
+
 ## [0.0.6] - 2022-01-29
 
 ### Changed
