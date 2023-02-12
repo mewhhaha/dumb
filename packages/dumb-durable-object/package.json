@@ -29,11 +29,11 @@
     "Cloudflare"
   ],
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20221111.1",
+    "@cloudflare/workers-types": "^4.20230115.0",
     "typescript": "5.0.0-beta"
   },
   "engines": {
     "node": ">=18.13.0",
-    "pnpm": ">=7.26.0"
+    "pnpm": ">=7.27.0"
   }
 }

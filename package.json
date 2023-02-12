@@ -12,11 +12,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "turbo": "^1.7.0",
+    "turbo": "^1.7.4",
     "typescript": "5.0.0-beta"
   },
   "engines": {
     "node": ">=18.13.0",
-    "pnpm": ">=7.26.0"
+    "pnpm": ">=7.27.0"
   }
 }
