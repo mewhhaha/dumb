@@ -9,21 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
-## [0.0.7] - 2022-02-12
+## [0.0.8] - 2023-02-20
+
+### Fixed
+
+- Fixed `CHANGELOG.md` dates accidentally saying `2022` instead of `2023`.
 
 ### Removed
+
+- Removed constructor setting `state` and `env` for `CallableDurableObject`.
+
+## [0.0.7] - 2023-02-12
+
+### Removed
+
 - Removed `ws` function. It is moved to the `dumb-durable-websocket` package.
 
 ### Changed
+
 - Changed path for callable objects to be under `/__dumb__/` to allow for other custom methods to be called.
 
-## [0.0.6] - 2022-01-29
+## [0.0.6] - 2023-01-29
 
 ### Changed
 
 - Changed canonical missing value for `value` and `error` from `undefined` to `null` so that the pattern can more reasily be replicated in other parts where there is a serialization boundary. 
 
-## [0.0.5] - 2022-01-28
+## [0.0.5] - 2023-01-28
 
 ### Changed
 
@@ -39,7 +51,7 @@ if (error) {
 }
 ```
 
-## [0.0.4] - 2022-01-27
+## [0.0.4] - 2023-01-27
 
 ### Changed
 
@@ -58,13 +70,16 @@ if (error) {
 ```
 - Changed error be more opaque with the type `ResultError` which is an interface. Previously the return type would blow up because of all the HTTP status codes that were possible.
 
-## [0.0.3] - 2022-01-27
+## [0.0.3] - 2023-01-27
+
+### Fixed
+
+- Fixed title in `README.md` to match package name.
+- Fixed `CHANGELOG.md` formatting to prefix with `Added`, `Changed` and so on.
+- Fixed `CHANGELOG.md` to have proper punctuation for list items.
 
 ### Changed
 
-- Changed title in `README.md` to match package name.
-- Changed `CHANGELOG.md` formatting to prefix with `Added`, `Changed` and so on.
-- Changed `CHANGELOG.md` to have proper punctuation for list items.
 - Changed `typescript` to be of version `5.0.0`
 
 ### Added
@@ -84,14 +99,14 @@ class DurableObjectExample extends CallableDurableObject {
 ```
 
 
-## [0.0.2] - 2022-01-26
+## [0.0.2] - 2023-01-26
 
 ### Added
 
 - Added `CHANGELOG.md` to track changes over time.
 - Added fields `repository`, `bugs` and `engines` to `package.json`.
 
-## [0.0.1] - 2022-01-22
+## [0.0.1] - 2023-01-22
 
 ### Added
 

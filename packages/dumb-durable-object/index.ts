@@ -32,9 +32,8 @@ export const error = <VALUE, ERROR>(
     status,
   }) as unknown as TypedResponse<Serialized<VALUE>, ERROR>;
 
-export type DurableObjectNamespaceIs<
-  ClassDO extends CallableDurableObject<any>
-> = DurableObjectNamespace & { __type?: ClassDO & never };
+export type DurableObjectNamespaceIs<ClassDO extends CallableDurableObject> =
+  DurableObjectNamespace & { __type?: ClassDO & never };
 
 export type External<A extends Record<string, any>> = Extract<
   {
@@ -43,7 +42,7 @@ export type External<A extends Record<string, any>> = Extract<
         ? Key
         : never
       : never;
-  }[Exclude<keyof A, keyof CallableDurableObject<any>>],
+  }[Exclude<keyof A, keyof CallableDurableObject>],
   string
 >;
 
@@ -69,7 +68,7 @@ export type Client<ClassDO extends Record<string, any>> = {
  * const value = await c.f("value")
  * ```
  */
-export const client = <ClassDO extends CallableDurableObject<any>>(
+export const client = <ClassDO extends CallableDurableObject>(
   request: { url: string; headers: Headers },
   ns: DurableObjectNamespaceIs<ClassDO>,
   name: string | DurableObjectId
@@ -124,14 +123,7 @@ export type Tail<T> = T extends [any, ...infer Rest] ? Rest : never;
  * }
  * ```
  */
-export class CallableDurableObject<Env = unknown> implements DurableObject {
-  protected state: DurableObjectState;
-  protected env: Env;
-  constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.env = env;
-  }
-
+export class CallableDurableObject implements DurableObject {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const [method] = url.pathname.split("/").slice(1);
