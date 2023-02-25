@@ -71,10 +71,14 @@ export type Client<ClassDO extends Record<string, any>> = {
 export const client = <ClassDO extends CallableDurableObject>(
   request: { url: string; headers: Headers },
   ns: DurableObjectNamespaceIs<ClassDO>,
-  name: string | DurableObjectId
+  name: string | DurableObjectId | { id: string }
 ): Client<ClassDO> => {
   const stub =
-    typeof name === "string" ? ns.get(ns.idFromName(name)) : ns.get(name);
+    typeof name === "string"
+      ? ns.get(ns.idFromName(name))
+      : "id" in name
+      ? ns.get(ns.idFromString(name.id))
+      : ns.get(name);
 
   const handler: ProxyHandler<Client<ClassDO>> = {
     get: <Method extends External<ClassDO>>(

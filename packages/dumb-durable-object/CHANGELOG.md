@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.9] - 2023-02-25
+
+### Added
+
+- Added `{ id: string }` option to name field for `client` for passing a string id. 
+
 ## [0.0.8] - 2023-02-20
 
 ### Fixed
