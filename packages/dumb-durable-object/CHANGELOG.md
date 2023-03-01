@@ -9,11 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.10] - 2023-03-02
+
+### Fixed
+
+- Fixed `Record<_,_>` type not being serialized properly
+
 ## [0.0.9] - 2023-02-25
 
 ### Added
 
-- Added `{ id: string }` option to name field for `client` for passing a string id. 
+- Added `{ id: string }` option to name field for `client` for passing a string id.
 
 ## [0.0.8] - 2023-02-20
 
@@ -39,15 +45,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changed canonical missing value for `value` and `error` from `undefined` to `null` so that the pattern can more reasily be replicated in other parts where there is a serialization boundary. 
+- Changed canonical missing value for `value` and `error` from `undefined` to `null` so that the pattern can more reasily be replicated in other parts where there is a serialization boundary.
 
 ## [0.0.5] - 2023-01-28
 
 ### Changed
 
 - Changed error value to reside in error, and instead have the undefined be the canonical value for success.
+
 ```tsx
-const [value, error] = c.helloWorld("MY NAME")
+const [value, error] = c.helloWorld("MY NAME");
 if (error) {
   // value is undefined here
   // error has status + any value that was passed on in { value }
@@ -62,18 +69,20 @@ if (error) {
 ### Changed
 
 - Changed result to be of a tuple of `[VALUE, ERROR]` instead of the previous object variant.
+
 ```tsx
 // This allows you to quickly rename the value instead of having to do `{ value: name }`
-const [value] = c.helloWorld("MY NAME")
+const [value] = c.helloWorld("MY NAME");
 
 // TypeScript is smart enough that when we check error, we can also validate what value is
-const [value, error] = c.helloWorld("MY NAME")
+const [value, error] = c.helloWorld("MY NAME");
 if (error) {
   // value is error value here
 } else {
   // value is successful value here
 }
 ```
+
 - Changed error be more opaque with the type `ResultError` which is an interface. Previously the return type would blow up because of all the HTTP status codes that were possible.
 
 ## [0.0.3] - 2023-01-27
@@ -92,9 +101,10 @@ if (error) {
 
 - Added type called `Callable` that has the function signature which is required for class functions to match in order for the client to pick them up
 - Added decorator called `@callable` that you can use to ensure the type signature of your function is correct.
+
 ```tsx
 class DurableObjectExample extends CallableDurableObject {
-  @callable  // Decorator that ensures the type signature required for it to be callable
+  @callable // Decorator that ensures the type signature required for it to be callable
   helloWorld(_: Request, name: string) {
     if (name === "") {
       return error(422, { message: "Your name was empty!" });
@@ -103,7 +113,6 @@ class DurableObjectExample extends CallableDurableObject {
   }
 }
 ```
-
 
 ## [0.0.2] - 2023-01-26
 

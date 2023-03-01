@@ -8,9 +8,9 @@ export type Serialized<T> = T extends string | null | number | boolean
   ? never
   : T extends (infer R)[]
   ? Serialized<R>[]
-  : T extends Record<infer TK, unknown>
+  : T extends Record<any, unknown>
   ? {
-      [Key in TK]: Serialized<T[Key]>;
+      [KEY in keyof T]: Serialized<T[KEY]>;
     }
   : never;
 
