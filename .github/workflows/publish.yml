@@ -21,6 +21,8 @@ jobs:
         with:
           node-version: 18.14.2
           cache: "pnpm"
+        env:
+          NPM_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
 
       - name: Install dependencies
         run: pnpm install
