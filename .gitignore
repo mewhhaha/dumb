@@ -4,6 +4,5 @@ dist
 .cache
 
 .DS_Store
-.npmrc
 
 .vscode
