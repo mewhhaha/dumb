@@ -50,7 +50,7 @@ export type Client<ClassDO extends Record<string, any>> = {
   readonly stub: DurableObjectStub;
 } & { readonly __type?: ClassDO & never } & {
   [Key in External<ClassDO>]: (
-    ...args: Tail<Parameters<ClassDO[Key]>>
+    ...args: Parameters<ClassDO[Key]>
   ) => Promise<
     Awaited<ReturnType<ClassDO[Key]>> extends TypedResponse<infer R, infer E>
       ? Result<R, E>
@@ -90,12 +90,10 @@ export const client = <ClassDO extends CallableDurableObject>(
       if (name === "stub") return obj.stub;
 
       return (
-        ...args: Tail<
-          Parameters<
-            ClassDO[Method] extends (...args: any[]) => any
-              ? ClassDO[Method]
-              : never
-          >
+        ...args: Parameters<
+          ClassDO[Method] extends (...args: any[]) => any
+            ? ClassDO[Method]
+            : never
         >
       ) => call(obj, name, ...args);
     },
@@ -107,8 +105,6 @@ export const client = <ClassDO extends CallableDurableObject>(
     handler
   );
 };
-
-export type Tail<T> = T extends [any, ...infer Rest] ? Rest : never;
 
 /**
  * @example
@@ -181,7 +177,7 @@ const call = async <
 >(
   { stub }: Client<ClassDO>,
   method: Method,
-  ...args: Tail<Parameters<ClassDO[Method]>>
+  ...args: Parameters<ClassDO[Method]>
 ): Promise<
   Awaited<ReturnType<ClassDO[Method]>> extends TypedResponse<infer R, infer E>
     ? Result<R, E>

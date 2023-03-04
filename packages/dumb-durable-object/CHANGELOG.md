@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.12] - 2023-03-04
+
+### Fixed
+
+- Fixed types of `callable` to not shave off the first argument
+
 ## [0.0.11] - 2023-03-04
 
 ### Changed
