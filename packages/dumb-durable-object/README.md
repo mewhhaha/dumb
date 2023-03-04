@@ -9,7 +9,7 @@ This is a simple example using the library.
 // In your worker most likely
 class DurableObjectExample extends CallableDurableObject {
   @callable // Decorator that ensures the type signature required for it to be callable
-  helloWorld(_: Request, name: string) {
+  helloWorld(name: string) {
     return respond(`Hello world, ${name}!`);
   }
 }
@@ -27,7 +27,7 @@ export async function onRequest({
   env: Env;
 }) {
   const id = "MY_DO_ID"; // Could also be a DurableObjectId
-  const c = client(request, env.DO_EXAMPLE, id);
+  const c = client(env.DO_EXAMPLE, id);
   const [value] = await c.helloWorld("MY NAME"); // Absence of error makes it easy deconstruct the value
 
   return new Response(value, { status: 200 });
@@ -39,7 +39,7 @@ export async function onRequest({
 // In your worker most likely
 class DurableObjectExample extends CallableDurableObject {
   @callable // Decorator that ensures the type signature required for it to be callable
-  helloWorld(_: Request, name: string) {
+  helloWorld(name: string) {
     if (name === "") {
       return error(422, { message: "Your name was empty!" });
     }
@@ -60,7 +60,7 @@ export async function onRequest({
   env: Env;
 }) {
   const id = "MY_DO_ID"; // Could also be a DurableObjectId
-  const c = client(request, env.DO_EXAMPLE, id);
+  const c = client(env.DO_EXAMPLE, id);
   const [value, err] = await c.helloWorld("MY NAME");
 
   // Since it might return an error we have to disambiguate

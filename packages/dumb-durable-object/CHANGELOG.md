@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.11] - 2023-03-04
+
+### Changed
+
+- Changed `client` to not take `Request` as its first argument (instead use a dummy origin)
+
+```tsx
+const c = client(env.DO_EXAMPLE, id);
+```
+
+- Changed `callable` to not take `Request` as its first argument
+
+```tsx
+class DurableObjectExample extends CallableDurableObject {
+  @callable
+  helloWorld(name: string) {
+    return respond(`Hello world, ${name}!`);
+  }
+}
+```
+
 ## [0.0.10] - 2023-03-02
 
 ### Fixed

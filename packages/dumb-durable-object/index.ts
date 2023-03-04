@@ -47,7 +47,6 @@ export type External<A extends Record<string, any>> = Extract<
 >;
 
 export type Client<ClassDO extends Record<string, any>> = {
-  readonly request: { url: string; headers: Headers };
   readonly stub: DurableObjectStub;
 } & { readonly __type?: ClassDO & never } & {
   [Key in External<ClassDO>]: (
@@ -64,12 +63,11 @@ export type Client<ClassDO extends Record<string, any>> = {
  * @example
  * ```tsx
  * const id = "MY_DO_ID";
- * const c = client(request, context.MY_DO, id);
+ * const c = client(context.MY_DO, id);
  * const value = await c.f("value")
  * ```
  */
 export const client = <ClassDO extends CallableDurableObject>(
-  request: { url: string; headers: Headers },
   ns: DurableObjectNamespaceIs<ClassDO>,
   name: string | DurableObjectId | { id: string }
 ): Client<ClassDO> => {
@@ -90,7 +88,6 @@ export const client = <ClassDO extends CallableDurableObject>(
       }
 
       if (name === "stub") return obj.stub;
-      if (name === "request") return obj.request;
 
       return (
         ...args: Tail<
@@ -105,7 +102,6 @@ export const client = <ClassDO extends CallableDurableObject>(
   };
   return new Proxy(
     {
-      request,
       stub,
     } as Client<ClassDO>,
     handler
@@ -121,7 +117,7 @@ export type Tail<T> = T extends [any, ...infer Rest] ? Rest : never;
  * ```tsx
  * class DurableObjectExample extends CallableDurableObject {
  *  @callable
- *  f(_: Request, value: string) {
+ *  f(value: string) {
  *    return respond(value)
  *  }
  * }
@@ -130,11 +126,11 @@ export type Tail<T> = T extends [any, ...infer Rest] ? Rest : never;
 export class CallableDurableObject implements DurableObject {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    const [method] = url.pathname.split("/").slice(1);
+    const [method] = url.pathname.slice(`${dummyOrigin}/`.length);
     const args = await request.json();
 
     // @ts-expect-error Here we go!
-    return await this[method](request, ...args);
+    return await this[method](...args);
   }
 }
 
@@ -143,7 +139,6 @@ export type Callable<
   VALUE = any,
   ERROR = any
 > = (
-  request: Request,
   ...args: ARGUMENTS
 ) => TypedResponse<VALUE, ERROR> | Promise<TypedResponse<VALUE, ERROR>>;
 
@@ -154,12 +149,12 @@ export type Callable<
  *
  * ```tsx
  *  \@callable
- *  notWorking(_: string, value: string) { // Gives error since it doesn't match the type
- *    return respond(value)
+ *  notWorking(value: string) { // Gives error since it doesn't match the type
+ *    return value
  *  }
  *
  *  \@callable
- *  working(_: Request, value: string) { // Doesn't give error since it matches the type
+ *  working(value: string) { // Doesn't give error since it matches the type
  *    return respond(value)
  *  }
  * ```
@@ -176,7 +171,7 @@ export const callable = <F extends Callable>(
  * @example
  * ```tsx
  * const id = "MY_DO_ID";
- * const c = client(request, context.MY_DO, id);
+ * const c = client(context.MY_DO, id);
  * const value = await call(c, "f");
  * ```
  */
@@ -184,7 +179,7 @@ const call = async <
   ClassDO extends Record<string, any>,
   Method extends External<ClassDO>
 >(
-  { stub, request }: Client<ClassDO>,
+  { stub }: Client<ClassDO>,
   method: Method,
   ...args: Tail<Parameters<ClassDO[Method]>>
 ): Promise<
@@ -192,14 +187,9 @@ const call = async <
     ? Result<R, E>
     : never
 > => {
-  const headers = new Headers(request.headers);
-  headers.delete("content-length");
-  headers.set("content-type", "application/json");
-  const origin = new URL(request.url).origin;
-  const response = await stub.fetch(`${origin}/${method}`, {
+  const response = await stub.fetch(`${dummyOrigin}/${method}`, {
     body: JSON.stringify(args),
     method: "post",
-    headers: headers,
   });
 
   if (!response.ok) {
@@ -224,3 +214,5 @@ export type HttpsStatusCode<D extends 2 | 3 | 4 | 5> =
 export type Result<R, E> = [E] extends [never]
   ? [success: R, error: null]
   : [success: R, error: null] | [failure: null, error: ResultError<E>];
+
+const dummyOrigin = "https://dummy.com";
