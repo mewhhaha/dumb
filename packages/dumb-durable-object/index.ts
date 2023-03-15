@@ -122,7 +122,7 @@ export const client = <ClassDO extends CallableDurableObject>(
 export class CallableDurableObject implements DurableObject {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    const [method] = url.pathname.slice(`${dummyOrigin}/`.length);
+    const method = url.pathname.slice("/".length);
     const args = await request.json();
 
     // @ts-expect-error Here we go!

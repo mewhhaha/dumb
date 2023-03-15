@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.13] - 2023-03-15
+
+### Fixed
+
+- Fixed fetch in `CallableDurableObject` not picking up the proper method name.
+
 ## [0.0.12] - 2023-03-04
 
 ### Fixed
