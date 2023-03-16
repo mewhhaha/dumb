@@ -13,7 +13,7 @@ importers:
   packages/dumb-durable-object:
     specifiers:
       '@cloudflare/workers-types': ^4.20230307.0
-      typescript: 5.0.2
+      typescript: ^5.0.2
     devDependencies:
       '@cloudflare/workers-types': 4.20230307.0
       typescript: 5.0.2
@@ -21,7 +21,7 @@ importers:
   packages/dumb-durable-websocket:
     specifiers:
       '@cloudflare/workers-types': ^4.20230307.0
-      typescript: 5.0.2
+      typescript: ^5.0.2
     devDependencies:
       '@cloudflare/workers-types': 4.20230307.0
       typescript: 5.0.2
