@@ -5,31 +5,31 @@ importers:
   .:
     specifiers:
       turbo: ^1.8.3
-      typescript: 5.0.0-beta
+      typescript: 5.0.2
     devDependencies:
       turbo: 1.8.3
-      typescript: 5.0.0-beta
+      typescript: 5.0.2
 
   packages/dumb-durable-object:
     specifiers:
-      '@cloudflare/workers-types': ^4.20230228.0
-      typescript: 5.0.0-beta
+      '@cloudflare/workers-types': ^4.20230307.0
+      typescript: 5.0.2
     devDependencies:
-      '@cloudflare/workers-types': 4.20230228.0
-      typescript: 5.0.0-beta
+      '@cloudflare/workers-types': 4.20230307.0
+      typescript: 5.0.2
 
   packages/dumb-durable-websocket:
     specifiers:
-      '@cloudflare/workers-types': ^4.20230228.0
-      typescript: 5.0.0-beta
+      '@cloudflare/workers-types': ^4.20230307.0
+      typescript: 5.0.2
     devDependencies:
-      '@cloudflare/workers-types': 4.20230228.0
-      typescript: 5.0.0-beta
+      '@cloudflare/workers-types': 4.20230307.0
+      typescript: 5.0.2
 
 packages:
 
-  /@cloudflare/workers-types/4.20230228.0:
-    resolution: {integrity: sha512-tDaqH3DrKmDoe/YrCnzVSqjNH6GnUOOajv2Ztj2h7BPLFyYTb81iCkARgb+G4bpxhn7y4f1KxxDT2+Yp4rt7Hg==}
+  /@cloudflare/workers-types/4.20230307.0:
+    resolution: {integrity: sha512-Go968aDDcqONHQcUdgIiPRkPdT4QTzD0ecHJsI1u7ZiHPMOoZn+Dy7hYsdUJ5ldX9wTZDrICBM1rDKTRaDUitg==}
     dev: true
 
   /turbo-darwin-64/1.8.3:
@@ -93,8 +93,8 @@ packages:
       turbo-windows-arm64: 1.8.3
     dev: true
 
-  /typescript/5.0.0-beta:
-    resolution: {integrity: sha512-+SSabbSXG5mtF+QGdV9uXXt9Saq1cSyI6hSG7znhaLoquleJpnmfkwSxFngK9c2fWWi1W/263TuzXQOsIcdjjA==}
-    engines: {node: '>=4.2.0'}
+  /typescript/5.0.2:
+    resolution: {integrity: sha512-wVORMBGO/FAs/++blGNeAVdbNKtIh1rbBL2EyQ1+J9lClJ93KiiKe8PmFIVdXhHcyv44SL9oglmfeSsndo0jRw==}
+    engines: {node: '>=12.20'}
     hasBin: true
     dev: true

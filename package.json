@@ -13,7 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "turbo": "^1.8.3",
-    "typescript": "5.0.0-beta"
+    "typescript": "5.0.2"
   },
   "engines": {
     "node": ">=18.13.0",
