@@ -211,4 +211,4 @@ export type Result<R, E> = [E] extends [never]
   ? [success: R, error: null]
   : [success: R, error: null] | [failure: null, error: ResultError<E>];
 
-const dummyOrigin = "https://dummy.com";
+const dummyOrigin = "http://dummy.com";

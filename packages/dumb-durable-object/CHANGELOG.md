@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.15] - 2023-03-16
+
+### Changed
+
+- Changed protocol from `https` to `http` for dummy protocol
+
 ## [0.0.14] - 2023-03-16
 
 ### Changed
