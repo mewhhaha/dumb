@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.16] - 2023-03-21
+
+### Changed
+
+- Changed `respond` and `error` to use `const` generics for more easily typing literals
+
 ## [0.0.15] - 2023-03-16
 
 ### Changed
