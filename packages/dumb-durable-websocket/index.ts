@@ -25,11 +25,7 @@ export const connect = (
   request: Request,
   { onAccept, onMessage, onOpen, onClose, onError }: ConnectHandlerConfig
 ): Response => {
-  if (isNotWebSocketUpgrade(request)) {
-    return new Response("Expected header 'Upgrade' to equal 'websocket' ", {
-      status: 400,
-    });
-  }
+
 
   const pair = new WebSocketPair();
   const websocket = pair[1];
@@ -85,7 +81,7 @@ export const broadcast = (
   });
 };
 
-const isNotWebSocketUpgrade = (request: Request) => {
+export const isNotWebSocketUpgrade = (request: Request) => {
   return request.headers.get("Upgrade") !== "websocket";
 };
 
