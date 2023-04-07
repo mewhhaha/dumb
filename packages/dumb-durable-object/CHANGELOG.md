@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Changed `ok` to have its parameter be optional
+- Changed tuple of `Result` to be undefined for non-existent values
 
 ## [0.0.17] - 2023-04-07
 

@@ -190,11 +190,11 @@ const call = async <
 
   if (!response.ok) {
     // @ts-ignore
-    return [null, { value: await response.json(), status: response.status }];
+    return [undefined, { value: await response.json(), status: response.status }];
   }
 
   // @ts-ignore
-  return [await response.json(), null];
+  return [await response.json(), undefined];
 };
 
 export interface ResultError<E> {
@@ -208,7 +208,7 @@ export type HttpsStatusCode<D extends 2 | 3 | 4 | 5> =
   `${D}${Digit}${Digit}` extends `${infer N extends number}` ? N : never;
 
 export type Result<R, E> = [E] extends [never]
-  ? [success: R, error: null]
-  : [success: R, error: null] | [failure: null, error: ResultError<E>];
+  ? [success: R, error: undefined]
+  : [success: R, error: undefined] | [failure: undefined, error: ResultError<E>];
 
 const dummyOrigin = "http://dummy.com";

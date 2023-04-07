@@ -1,10 +1,13 @@
 # Dumb Durable Object
+
 This is a small package to ease the friction when communicating with a `Durable Object` binding. This package is under development and if you want to use it in any stable capacity I suggest you copy over the code and maintain it yourself. If you do any good improvements it'd be greatly appreciated if you can contribute back. There will likely be a lot of breaking packages when this package updates as it is in its infancy.
 
 ## Usage
+
 This is a simple example using the library.
 
 ### Simple response
+
 ```ts
 // In your worker most likely
 class DurableObjectExample extends CallableDurableObject {
@@ -35,6 +38,7 @@ export async function onRequest({
 ```
 
 ### Error response
+
 ```ts
 // In your worker most likely
 class DurableObjectExample extends CallableDurableObject {
@@ -64,7 +68,7 @@ export async function onRequest({
   const [value, err] = await c.helloWorld("MY NAME");
 
   // Since it might return an error we have to disambiguate
-  if (err !== null) {
+  if (err !== undefined) {
     // value is of type { message: string }
     return new Response(err.value.message, { status: err.status }); // Notice we get the error value here
   }
