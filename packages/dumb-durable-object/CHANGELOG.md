@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.18] - 2023-04-07
+
+### Changed
+
+- Changed `ok` to have its parameter be optional
+
 ## [0.0.17] - 2023-04-07
 
 ### Changed

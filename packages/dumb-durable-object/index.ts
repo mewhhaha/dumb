@@ -16,10 +16,10 @@ export type Serialized<T> = T extends string | null | number | boolean
 
 export type TypedResponse<VALUE, ERROR> = Response & { __t: VALUE; __e: ERROR };
 
-export const ok = <const VALUE>(
-  value: VALUE
+export const ok = <const VALUE = null>(
+  value?: VALUE 
 ): TypedResponse<Serialized<VALUE>, never> =>
-  new Response(JSON.stringify(value)) as unknown as TypedResponse<
+  new Response(JSON.stringify(value ?? null)) as unknown as TypedResponse<
     Serialized<VALUE>,
     never
   >;
