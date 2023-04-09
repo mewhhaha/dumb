@@ -1,15 +1,15 @@
 {
-  "name": "dumb-durable-object",
+  "name": "dumb-router",
   "author": "Jacob Torrång",
-  "version": "0.0.18",
+  "version": "0.0.1",
   "license": "MIT",
-  "description": "This is a package to make it easier to do rpc with your durable object by adding ways of typing and calling endpoints",
+  "description": "This is a package to more easier set up a router with workers",
   "module": "dist/index.js",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/mewhhaha/dumb.git",
-    "directory": "packages/dumb-durable-object"
+    "directory": "packages/dumb-router"
   },
   "bugs": "https://github.com/mewhhaha/dumb/issues",
   "files": [
@@ -21,16 +21,20 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepublish": "pnpm build",
+    "test": "vitest",
     "build": "tsc --project ./tsconfig.json"
   },
   "keywords": [
-    "Durable Object",
+    "Worker",
+    "Router",
     "Utility",
     "Cloudflare"
   ],
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230404.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vite": "^4.2.1",
+    "vitest": "^0.30.0"
   },
   "engines": {
     "node": ">=18.13.0",

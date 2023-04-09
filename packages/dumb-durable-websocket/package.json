@@ -30,11 +30,11 @@
     "Cloudflare"
   ],
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20230307.0",
-    "typescript": "^5.0.2"
+    "@cloudflare/workers-types": "^4.20230404.0",
+    "typescript": "^5.0.4"
   },
   "engines": {
     "node": ">=18.13.0",
-    "pnpm": ">=7.27.0"
+    "pnpm": ">=8.0.0"
   }
 }
