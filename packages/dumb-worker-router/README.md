@@ -1,4 +1,4 @@
-# Dumb Router
+# Dumb Worker Router
 This is a small package to ease the friction when setting up a router for a `Cloudflare Worker`. The syntax is very similar to [`itty-router`](https://github.com/kwhitley/itty-router), but doesn't have as much functionality. But typings are good. 🔥
 
 
