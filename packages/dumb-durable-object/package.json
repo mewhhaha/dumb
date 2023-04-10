@@ -1,7 +1,7 @@
 {
   "name": "dumb-durable-object",
   "author": "Jacob Torrång",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "license": "MIT",
   "description": "This is a package to make it easier to do rpc with your durable object by adding ways of typing and calling endpoints",
   "module": "dist/index.js",
@@ -20,8 +20,9 @@
   ],
   "types": "dist/index.d.ts",
   "scripts": {
+    "test": "vitest",
     "prepublish": "pnpm build",
-    "build": "tsc --project ./tsconfig.json"
+    "build": "tsc --project ./tsconfig.build.json"
   },
   "keywords": [
     "Durable Object",
@@ -30,7 +31,9 @@
   ],
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230404.0",
-    "typescript": "^5.0.4"
+    "prettier": "^2.8.7",
+    "typescript": "^5.0.4",
+    "vitest": "^0.30.0"
   },
   "engines": {
     "node": ">=18.13.0",

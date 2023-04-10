@@ -14,23 +14,105 @@ export type Serialized<T> = T extends string | null | number | boolean
     }
   : never;
 
-export type TypedResponse<VALUE, ERROR> = Response & { __t: VALUE; __e: ERROR };
+type HttpStatus1XX = 100 | 101 | 102 | 103;
+type HttpStatus2XX = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226;
+type HttpStatus3XX = 300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308;
+type HttpStatus4XX =
+  | 400
+  | 401
+  | 402
+  | 403
+  | 404
+  | 405
+  | 406
+  | 407
+  | 408
+  | 409
+  | 410
+  | 411
+  | 412
+  | 413
+  | 414
+  | 415
+  | 416
+  | 417
+  | 418
+  | 421
+  | 422
+  | 423
+  | 424
+  | 425
+  | 426
+  | 428
+  | 429
+  | 431
+  | 451;
 
-export const ok = <const VALUE = null>(
-  value?: VALUE 
-): TypedResponse<Serialized<VALUE>, never> =>
-  new Response(JSON.stringify(value ?? null)) as unknown as TypedResponse<
-    Serialized<VALUE>,
-    never
-  >;
+type HttpStatus5XX =
+  | 500
+  | 501
+  | 502
+  | 503
+  | 504
+  | 505
+  | 506
+  | 507
+  | 508
+  | 510
+  | 511;
 
-export const error = <const VALUE, const ERROR>(
-  status: HttpsStatusCode<4 | 5>,
-  value: ERROR
-): TypedResponse<Serialized<VALUE>, ERROR> =>
-  new Response(value ? JSON.stringify(value) : null, {
+export type HttpStatusAny =
+  | HttpStatus1XX
+  | HttpStatus2XX
+  | HttpStatus3XX
+  | HttpStatus4XX
+  | HttpStatus5XX;
+export type HttpStatusError = HttpStatus4XX | HttpStatus5XX;
+export type HttpStatusOk = HttpStatus2XX;
+
+export type TypedResponse<VALUE, ERROR, CODE> = Response & {
+  __t: VALUE;
+  __e: ERROR;
+  __c: CODE;
+};
+
+export const ok = <const CODE extends HttpStatusOk, const VALUE = null>(
+  status: CODE,
+  value?: VALUE,
+  response?: Omit<ResponseInit, "status">
+): TypedResponse<Serialized<VALUE>, never, CODE> =>
+  new Response(JSON.stringify(value ?? null), {
     status,
-  }) as unknown as TypedResponse<Serialized<VALUE>, ERROR>;
+    ...response,
+  }) as unknown as TypedResponse<Serialized<VALUE>, never, CODE>;
+
+export const body = <const CODE extends HttpStatusAny>(
+  status: CODE,
+  value?: BodyInit,
+  response?: Omit<ResponseInit, "status">
+): CODE extends HttpStatusOk
+  ? TypedResponse<unknown, never, CODE>
+  : TypedResponse<never, unknown, CODE> =>
+  new Response(value, {
+    status,
+    ...response,
+  }) as unknown as CODE extends HttpStatusOk
+    ? TypedResponse<unknown, never, CODE>
+    : TypedResponse<never, unknown, CODE>;
+
+export const error = <
+  const CODE extends HttpStatusError,
+  const VALUE,
+  const ERROR = CODE
+>(
+  status: CODE,
+  value?: ERROR,
+  response?: Omit<ResponseInit, "status">
+): TypedResponse<Serialized<VALUE>, ERROR, CODE> =>
+  new Response(JSON.stringify(value ?? status), {
+    status,
+    ...response,
+  }) as unknown as TypedResponse<Serialized<VALUE>, ERROR, CODE>;
 
 export type DurableObjectNamespaceIs<ClassDO extends CallableDurableObject> =
   DurableObjectNamespace & { __type?: ClassDO & never };
@@ -52,8 +134,12 @@ export type Client<ClassDO extends Record<string, any>> = {
   [Key in External<ClassDO>]: (
     ...args: Parameters<ClassDO[Key]>
   ) => Promise<
-    Awaited<ReturnType<ClassDO[Key]>> extends TypedResponse<infer R, infer E>
-      ? Result<R, E>
+    Awaited<ReturnType<ClassDO[Key]>> extends TypedResponse<
+      infer R,
+      infer E,
+      infer C
+    >
+      ? Result<R, E, C>
       : never
   >;
 };
@@ -133,10 +219,13 @@ export class CallableDurableObject implements DurableObject {
 export type Callable<
   ARGUMENTS extends any[] = any[],
   VALUE = any,
-  ERROR = any
+  ERROR = any,
+  CODE = any
 > = (
   ...args: ARGUMENTS
-) => TypedResponse<VALUE, ERROR> | Promise<TypedResponse<VALUE, ERROR>>;
+) =>
+  | TypedResponse<VALUE, ERROR, CODE>
+  | Promise<TypedResponse<VALUE, ERROR, CODE>>;
 
 /** decorator for functions in classes to ensure the type signature
  * matches that which is expected from the client
@@ -179,8 +268,12 @@ const call = async <
   method: Method,
   ...args: Parameters<ClassDO[Method]>
 ): Promise<
-  Awaited<ReturnType<ClassDO[Method]>> extends TypedResponse<infer R, infer E>
-    ? Result<R, E>
+  Awaited<ReturnType<ClassDO[Method]>> extends TypedResponse<
+    infer R,
+    infer E,
+    infer C
+  >
+    ? Result<R, E, C>
     : never
 > => {
   const response = await stub.fetch(`${dummyOrigin}/${method}`, {
@@ -188,27 +281,33 @@ const call = async <
     method: "post",
   });
 
-  if (!response.ok) {
-    // @ts-ignore
-    return [undefined, { value: await response.json(), status: response.status }];
-  }
-
   // @ts-ignore
-  return [await response.json(), undefined];
+  return response;
 };
 
 export interface ResultError<E> {
   value: E;
-  status: HttpsStatusCode<4 | 5>;
+  status: HttpStatusError;
 }
 
-export type Digit = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+type ResponseOk<VALUE, STATUS> = Omit<Response, "json" | "status" | "ok"> & {
+  status: STATUS;
+  ok: true;
+  json: () => Promise<VALUE>;
+};
 
-export type HttpsStatusCode<D extends 2 | 3 | 4 | 5> =
-  `${D}${Digit}${Digit}` extends `${infer N extends number}` ? N : never;
+type ResponseError<ERROR, STATUS> = Omit<Response, "json" | "status" | "ok"> & {
+  status: STATUS;
+  ok: false;
+  json: () => Promise<ERROR>;
+};
 
-export type Result<R, E> = [E] extends [never]
-  ? [success: R, error: undefined]
-  : [success: R, error: undefined] | [failure: undefined, error: ResultError<E>];
+export type Result<R, E, C> = [E] extends [never]
+  ? ResponseOk<R, C>
+  : [R] extends [never]
+  ? ResponseError<E, C>
+  :
+      | ResponseOk<R, Extract<C, HttpStatusOk>>
+      | ResponseError<E, Extract<C, HttpStatusError>>;
 
 const dummyOrigin = "http://dummy.com";

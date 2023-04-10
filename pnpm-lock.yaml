@@ -16,15 +16,24 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20230404.0
         version: 4.20230404.0
+      prettier:
+        specifier: ^2.8.7
+        version: 2.8.7
       typescript:
         specifier: ^5.0.4
         version: 5.0.4
+      vitest:
+        specifier: ^0.30.0
+        version: 0.30.0
 
   packages/dumb-durable-websocket:
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20230404.0
         version: 4.20230404.0
+      prettier:
+        specifier: ^2.8.7
+        version: 2.8.7
       typescript:
         specifier: ^5.0.4
         version: 5.0.4
@@ -34,12 +43,12 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20230404.0
         version: 4.20230404.0
+      prettier:
+        specifier: ^2.8.7
+        version: 2.8.7
       typescript:
         specifier: ^5.0.4
         version: 5.0.4
-      vite:
-        specifier: ^4.2.1
-        version: 4.2.1(@types/node@18.15.11)
       vitest:
         specifier: ^0.30.0
         version: 0.30.0
@@ -566,6 +575,12 @@ packages:
       nanoid: 3.3.6
       picocolors: 1.0.0
       source-map-js: 1.0.2
+    dev: true
+
+  /prettier@2.8.7:
+    resolution: {integrity: sha512-yPngTo3aXUUmyuTjeTUT75txrf+aMh9FiD7q9ZE/i6r0bPb22g4FsE6Y338PQX1bmfy08i9QQCB7/rcUAVntfw==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
     dev: true
 
   /pretty-format@27.5.1:

@@ -7,8 +7,6 @@ export type Method =
   | "put"
   | "patch"
   | "head"
-  | "connect"
-  | "trace"
   | "all";
 
 export type Path = `/${string}` | "*";

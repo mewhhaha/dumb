@@ -1,5 +1,6 @@
 import { assertType, describe, expect, test } from "vitest";
-import { Router, WorkerFetch } from ".";
+import { Router, WorkerRouter } from "./index";
+import { ExecutionContext } from "@cloudflare/workers-types";
 
 describe("Router", () => {
   const methods = [
@@ -10,8 +11,6 @@ describe("Router", () => {
     "patch",
     "head",
     "options",
-    "connect",
-    "trace",
     "all",
   ] as const;
 
@@ -129,14 +128,12 @@ describe("Router", () => {
   });
 
   test("passes on rest types", async () => {
-    Router<WorkerFetch<Record<never, never>>>().get(
-      "*",
-      ({ params }, env, ctx) => {
-        assertType<ExecutionContext>(ctx);
-        assertType<typeof env>(env);
-        return new Response(params["*"], { status: 200 });
-      }
-    );
+    const s = Symbol();
+    Router<WorkerRouter<typeof s>>().get("*", ({ params }, env, ctx) => {
+      assertType<ExecutionContext>(ctx);
+      assertType<typeof s>(env);
+      return new Response(params["*"], { status: 200 });
+    });
   });
 
   test("passes on rest arguments", async () => {

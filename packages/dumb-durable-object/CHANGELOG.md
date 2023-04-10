@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.19] - 2023-04-10
+
+### Changed
+
+- Changed `client` to return a response to be differentiated by `ok` instead of tuple
+- Changed http status codes to be limited to valid status codes
+
+### Added
+- Added `body` response for 
+
 ## [0.0.18] - 2023-04-07
 
 ### Changed

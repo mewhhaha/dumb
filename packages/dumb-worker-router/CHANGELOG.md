@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.2] - 2023-04-10
+### Changed
+
+- Remove `trace` and `connect` from `Router` methods
+## [0.0.1] - 2023-04-09
 ### Changed
 
 - Added `Router` for most methods

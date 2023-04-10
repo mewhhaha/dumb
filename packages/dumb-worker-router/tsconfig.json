@@ -13,6 +13,5 @@
     "lib": ["esnext"],
     "resolveJsonModule": true,
     "types": ["@cloudflare/workers-types"]
-  },
-  "include": ["index.ts"]
+  }
 }
