@@ -20,19 +20,28 @@ export const close = (
   }
 };
 
-export const connect = (
+/**
+ *
+ * @example
+ * ```ts
+ * const pool = ws();
+ * const s = accept(pool, () => {});
+ * return new Response(null, { status: 101, webSocket: s });
+ * ```
+ */
+export const accept = (
   ws: WebSocketPool,
   setup: (socket: WebSocket) => void | Promise<void>
-): Response => {
+): WebSocket => {
   const pair = new WebSocketPair();
-  const websocket = pair[1];
+  const socket = pair[1];
 
-  websocket.accept();
-  ws.sessions.push(websocket);
+  socket.accept();
+  ws.sessions.push(socket);
 
   setup(pair[1]);
 
-  return new Response(null, { status: 101, webSocket: pair[0] });
+  return pair[0];
 };
 
 export const disconnect = (
