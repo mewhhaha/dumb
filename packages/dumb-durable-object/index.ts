@@ -67,8 +67,14 @@ export type HttpStatusAny =
   | HttpStatus3XX
   | HttpStatus4XX
   | HttpStatus5XX;
+
 export type HttpStatusError = HttpStatus4XX | HttpStatus5XX;
-export type HttpStatusOk = HttpStatus2XX;
+export type HttpStatusOther =
+  | HttpStatus1XX
+  | HttpStatus2XX
+  | HttpStatus4XX
+  | HttpStatus5XX;
+export type HttpStatusOk = HttpStatus1XX | HttpStatus2XX | HttpStatus3XX;
 
 export type TypedResponse<VALUE, ERROR, CODE> = Response & {
   __t: VALUE;
@@ -287,7 +293,7 @@ const call = async <
 
 export interface ResultError<E> {
   value: E;
-  status: HttpStatusError;
+  status: HttpStatusOther;
 }
 
 type ResponseOk<VALUE, STATUS> = Omit<Response, "json" | "status" | "ok"> & {
@@ -296,7 +302,7 @@ type ResponseOk<VALUE, STATUS> = Omit<Response, "json" | "status" | "ok"> & {
   json: () => Promise<VALUE>;
 };
 
-type ResponseError<ERROR, STATUS> = Omit<Response, "json" | "status" | "ok"> & {
+type ResponseNotOk<ERROR, STATUS> = Omit<Response, "json" | "status" | "ok"> & {
   status: STATUS;
   ok: false;
   json: () => Promise<ERROR>;
@@ -305,9 +311,9 @@ type ResponseError<ERROR, STATUS> = Omit<Response, "json" | "status" | "ok"> & {
 export type Result<R, E, C> = [E] extends [never]
   ? ResponseOk<R, C>
   : [R] extends [never]
-  ? ResponseError<E, C>
+  ? ResponseNotOk<E, C>
   :
       | ResponseOk<R, Extract<C, HttpStatusOk>>
-      | ResponseError<E, Extract<C, HttpStatusError>>;
+      | ResponseNotOk<E, Extract<C, HttpStatusOther>>;
 
 const dummyOrigin = "http://dummy.com";

@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.20] - 2023-04-10
+
+### Changed
+
+- Changed naming for not ok return type to be `ResponseNotOk` instead of `ResponseError`
+
+
 ## [0.0.19] - 2023-04-10
 
 ### Changed
