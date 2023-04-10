@@ -69,12 +69,8 @@ export type HttpStatusAny =
   | HttpStatus5XX;
 
 export type HttpStatusError = HttpStatus4XX | HttpStatus5XX;
-export type HttpStatusOther =
-  | HttpStatus1XX
-  | HttpStatus2XX
-  | HttpStatus4XX
-  | HttpStatus5XX;
-export type HttpStatusOk = HttpStatus1XX | HttpStatus2XX | HttpStatus3XX;
+export type HttpStatusOther = HttpStatus1XX | HttpStatus2XX;
+export type HttpStatusOk = HttpStatus2XX;
 
 export type TypedResponse<VALUE, ERROR, CODE> = Response & {
   __t: VALUE;
@@ -290,11 +286,6 @@ const call = async <
   // @ts-ignore
   return response;
 };
-
-export interface ResultError<E> {
-  value: E;
-  status: HttpStatusOther;
-}
 
 type ResponseOk<VALUE, STATUS> = Omit<Response, "json" | "status" | "ok"> & {
   status: STATUS;
