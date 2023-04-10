@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ...
+## [0.0.4] - 2023-04-10
+
+### Changed
+
+- Changed `connect` to take a callback that provides the socket instead of specifiying every callback
+- Changed `WebSocketServer` to `WebSocketPool`
 
 ## [0.0.3] - 2023-04-07
 
