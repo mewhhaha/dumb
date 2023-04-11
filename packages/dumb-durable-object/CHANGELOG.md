@@ -9,13 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.22] - 2023-04-11
+
+### Fixed
+
+- Fixed `Serialized` type not accepting valid values
+- Fixed `callable` not checking for serializable parameters
+- Fixed `error` return type making `ok` into unknown
+
 ## [0.0.21] - 2023-04-10
 
 ### Fixed
 
 - Fixed types for `OK` status
-
-
 
 ## [0.0.20] - 2023-04-10
 

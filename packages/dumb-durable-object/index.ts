@@ -1,18 +1,36 @@
-export type Serialized<T> = T extends string | null | number | boolean
-  ? T
-  : T extends Date
-  ? string
-  : T extends null
-  ? null
-  : T extends (...args: any[]) => any
-  ? never
-  : T extends (infer R)[]
-  ? Serialized<R>[]
-  : T extends Record<any, unknown>
-  ? {
-      [KEY in keyof T]: Serialized<T[KEY]>;
-    }
+type ISODateString =
+  `${number}-${number}-${number}T${number}:${number}:${number}.${number}Z`;
+
+type UndefinedKeys<T> = {
+  [K in keyof T]: undefined extends T[K] ? K : never;
+}[keyof T];
+
+type UndefinedOptional<T> = Omit<T, UndefinedKeys<T>> &
+  Partial<Pick<T, UndefinedKeys<T>>>;
+
+type SerializedObject<T> = UndefinedOptional<{
+  [K in keyof T]: Serialized<T[K]>;
+}>;
+
+type SerializedArray<T> = Array<T> extends Array<infer U>
+  ? Array<Serialized<U>>
   : never;
+
+type Serialized<T> = T extends Date
+  ? ISODateString
+  : T extends (...args: any[]) => any
+  ? undefined
+  : T extends Symbol
+  ? undefined
+  : T extends Map<any, any>
+  ? Record<never, never>
+  : T extends Set<any>
+  ? Record<never, never>
+  : T extends Array<infer U>
+  ? SerializedArray<U>
+  : T extends object
+  ? SerializedObject<T>
+  : T;
 
 type HttpStatus1XX = 100 | 101 | 102 | 103;
 type HttpStatus2XX = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226;
@@ -102,22 +120,18 @@ export const body = <const CODE extends HttpStatusAny>(
     ? TypedResponse<unknown, never, CODE>
     : TypedResponse<never, unknown, CODE>;
 
-export const error = <
-  const CODE extends HttpStatusError,
-  const VALUE,
-  const ERROR = CODE
->(
+export const error = <const CODE extends HttpStatusError, const ERROR = CODE>(
   status: CODE,
   value?: ERROR,
   response?: Omit<ResponseInit, "status">
-): TypedResponse<Serialized<VALUE>, ERROR, CODE> =>
+): TypedResponse<never, Serialized<ERROR>, CODE> =>
   new Response(JSON.stringify(value ?? status), {
     status,
     ...response,
-  }) as unknown as TypedResponse<Serialized<VALUE>, ERROR, CODE>;
+  }) as unknown as TypedResponse<never, Serialized<ERROR>, CODE>;
 
-export type DurableObjectNamespaceIs<ClassDO extends CallableDurableObject> =
-  DurableObjectNamespace & { __type?: ClassDO & never };
+export type DurableObjectNamespaceIs<OBJECT extends CallableDurableObject> =
+  DurableObjectNamespace & { __type?: OBJECT & never };
 
 export type External<A extends Record<string, any>> = Extract<
   {
@@ -224,7 +238,7 @@ export type Callable<
   ERROR = any,
   CODE = any
 > = (
-  ...args: ARGUMENTS
+  ...args: Serialized<ARGUMENTS>
 ) =>
   | TypedResponse<VALUE, ERROR, CODE>
   | Promise<TypedResponse<VALUE, ERROR, CODE>>;
@@ -247,7 +261,11 @@ export type Callable<
  * ```
  * */
 export const callable = <const F extends Callable>(
-  originalMethod: F,
+  originalMethod: F extends Callable<infer R>
+    ? [R] extends [Serialized<R>]
+      ? F
+      : never
+    : never,
   _: ClassMethodDecoratorContext
 ) => {
   return originalMethod;
@@ -305,6 +323,6 @@ export type Result<R, E, C> = [E] extends [never]
   ? ResponseNotOk<E, C>
   :
       | ResponseOk<R, Extract<C, HttpStatusOk>>
-      | ResponseNotOk<E, Extract<C, HttpStatusOther>>;
+      | ResponseNotOk<E, Exclude<C, HttpStatusOk>>;
 
 const dummyOrigin = "http://dummy.com";

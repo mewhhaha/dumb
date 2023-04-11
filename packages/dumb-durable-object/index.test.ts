@@ -9,9 +9,9 @@ import {
   ok,
 } from "./index";
 
-const mockNamespace = <ClassDO extends CallableDurableObject>(
-  obj: ClassDO
-): DurableObjectNamespaceIs<ClassDO> => {
+const mockNamespace = <OBJECT extends CallableDurableObject>(
+  obj: OBJECT
+): DurableObjectNamespaceIs<OBJECT> => {
   const id: DurableObjectId = {
     toString: () => "id",
     equals(this: DurableObjectId, other: DurableObjectId) {
@@ -31,7 +31,7 @@ const mockNamespace = <ClassDO extends CallableDurableObject>(
     idFromString: () => id,
     get: () => stub,
     newUniqueId: () => id,
-    jurisdiction(this: DurableObjectNamespaceIs<ClassDO>) {
+    jurisdiction(this: DurableObjectNamespaceIs<OBJECT>) {
       return this;
     },
   };
