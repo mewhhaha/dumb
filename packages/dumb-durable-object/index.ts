@@ -178,12 +178,11 @@ export const client = <ClassDO extends CallableDurableObject>(
 ): Client<ClassDO> => {
   const request = Array.isArray(init) ? init[1] : undefined;
   const ns = Array.isArray(init) ? init[0] : init;
-  const stub =
-    typeof name === "string"
-      ? ns.get(ns.idFromName(name))
-      : "id" in name
-      ? ns.get(ns.idFromString(name.id))
-      : ns.get(name);
+  const stub = () => {
+    if (typeof name === "string") return ns.get(ns.idFromName(name));
+    if ("id" in name) return ns.get(ns.idFromString(name.id));
+    return ns.get(name);
+  };
 
   const handler: ProxyHandler<Client<ClassDO>> = {
     get: <Method extends External<ClassDO>>(
@@ -207,7 +206,7 @@ export const client = <ClassDO extends CallableDurableObject>(
   };
   return new Proxy(
     {
-      stub,
+      stub: stub(),
       request,
     } as Client<ClassDO>,
     handler
@@ -230,11 +229,11 @@ export const client = <ClassDO extends CallableDurableObject>(
 export class CallableDurableObject implements DurableObject {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    const method = url.pathname.slice("/".length) as keyof this;
-    const args = await request.json();
+    const [_, method, base64] = url.pathname.split("/");
+    const args = base64 ? JSON.parse(btoa(base64)) : await request.json();
 
     // @ts-expect-error Here we go!
-    return await this[method](...args);
+    return await this[method as keyof this](...args);
   }
 }
 
@@ -302,14 +301,23 @@ const call = async <
     ? Result<R, E, C>
     : never
 > => {
-  const response = await stub.fetch(`${dummyOrigin}/${method}`, {
-    body: JSON.stringify(args),
-    method: "POST",
-    headers: request?.headers,
-  });
+  const headers = request?.headers;
+  const base = `${dummyOrigin}/${method}`;
+  const body = JSON.stringify(args);
 
-  // @ts-ignore
-  return response;
+  // Some requests require passing on the request as a GET-request like WebSocket upgrade
+  if (method === "GET") {
+    const base64 = btoa(body);
+    const req = new Request(`${base}/${base64}`, { method: "GET", headers });
+
+    // @ts-ignore
+    return await stub.fetch(req);
+  } else {
+    const req = new Request(base, { method: "POST", headers, body });
+
+    // @ts-ignore
+    return await stub.fetch(req);
+  }
 };
 
 type ResponseOk<VALUE, STATUS> = Omit<Response, "json" | "status" | "ok"> & {
