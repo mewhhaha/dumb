@@ -108,7 +108,7 @@ export const ok = <const CODE extends HttpStatusOk, const VALUE = null>(
 
 export const body = <const CODE extends HttpStatusAny>(
   status: CODE,
-  value?: BodyInit,
+  value?: BodyInit | null,
   response?: Omit<ResponseInit, "status">
 ): CODE extends HttpStatusOk
   ? TypedResponse<unknown, never, CODE>
@@ -146,6 +146,7 @@ export type External<A extends Record<string, any>> = Extract<
 
 export type Client<ClassDO extends Record<string, any>> = {
   readonly stub: DurableObjectStub;
+  readonly request?: Request;
 } & { readonly __type?: ClassDO & never } & {
   [Key in External<ClassDO>]: (
     ...args: Parameters<ClassDO[Key]>
@@ -170,10 +171,13 @@ export type Client<ClassDO extends Record<string, any>> = {
  * ```
  */
 export const client = <ClassDO extends CallableDurableObject>(
-  ns: DurableObjectNamespaceIs<ClassDO>,
-  name: string | DurableObjectId | { id: string },
-  request?: Request
+  init:
+    | DurableObjectNamespaceIs<ClassDO>
+    | [DurableObjectNamespaceIs<ClassDO>, Request],
+  name: string | DurableObjectId | { id: string }
 ): Client<ClassDO> => {
+  const request = Array.isArray(init) ? init[1] : undefined;
+  const ns = Array.isArray(init) ? init[0] : init;
   const stub =
     typeof name === "string"
       ? ns.get(ns.idFromName(name))
@@ -198,12 +202,13 @@ export const client = <ClassDO extends CallableDurableObject>(
             ? ClassDO[Method]
             : never
         >
-      ) => call(obj, request?.headers ?? new Headers(), name, ...args);
+      ) => call(obj, name, ...args);
     },
   };
   return new Proxy(
     {
       stub,
+      request,
     } as Client<ClassDO>,
     handler
   );
@@ -225,7 +230,7 @@ export const client = <ClassDO extends CallableDurableObject>(
 export class CallableDurableObject implements DurableObject {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    const method = url.pathname.slice("/".length);
+    const method = url.pathname.slice("/".length) as keyof this;
     const args = await request.json();
 
     // @ts-expect-error Here we go!
@@ -285,8 +290,7 @@ const call = async <
   ClassDO extends Record<string, any>,
   Method extends External<ClassDO>
 >(
-  { stub }: Client<ClassDO>,
-  headers: Headers,
+  { stub, request }: Client<ClassDO>,
   method: Method,
   ...args: Parameters<ClassDO[Method]>
 ): Promise<
@@ -300,8 +304,8 @@ const call = async <
 > => {
   const response = await stub.fetch(`${dummyOrigin}/${method}`, {
     body: JSON.stringify(args),
-    method: "post",
-    headers,
+    method: "POST",
+    headers: request?.headers,
   });
 
   // @ts-ignore

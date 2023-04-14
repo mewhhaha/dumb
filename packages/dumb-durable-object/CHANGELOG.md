@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.24] - 2023-04-14
+
+### Changed
+
+- Changed passing `request` to `client` to be a tuple of the namespace and the request
 
 ## [0.0.23] - 2023-04-14
 
