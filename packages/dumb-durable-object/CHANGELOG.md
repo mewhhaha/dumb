@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.26] - 2023-04-15
+
+### Fixed
+
+- Fixed `GET` requests not being properly recognized
+
 ## [0.0.25] - 2023-04-15
 
 ### Added

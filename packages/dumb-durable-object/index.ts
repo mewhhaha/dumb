@@ -290,7 +290,7 @@ const call = async <
   Method extends External<ClassDO>
 >(
   { stub, request }: Client<ClassDO>,
-  method: Method,
+  classMethod: Method,
   ...args: Parameters<ClassDO[Method]>
 ): Promise<
   Awaited<ReturnType<ClassDO[Method]>> extends TypedResponse<
@@ -301,19 +301,20 @@ const call = async <
     ? Result<R, E, C>
     : never
 > => {
-  const headers = request?.headers;
-  const base = `${dummyOrigin}/${method}`;
+  const method = request?.method ?? "POST";
+  const headers = request?.headers ?? new Headers();
+  const base = `${dummyOrigin}/${classMethod}`;
   const body = JSON.stringify(args);
 
   // Some requests require passing on the request as a GET-request like WebSocket upgrade
   if (method === "GET") {
     const base64 = btoa(body);
-    const req = new Request(`${base}/${base64}`, { method: "GET", headers });
+    const req = new Request(`${base}/${base64}`, { method, headers });
 
     // @ts-ignore
     return await stub.fetch(req);
   } else {
-    const req = new Request(base, { method: "POST", headers, body });
+    const req = new Request(base, { method, headers, body });
 
     // @ts-ignore
     return await stub.fetch(req);
