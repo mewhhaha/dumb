@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+
+## [0.0.23] - 2023-04-14
+
+### Changed
+
+- Added optional `request` parameter to `client` to pass on headers
+
 ## [0.0.22] - 2023-04-11
 
 ### Fixed

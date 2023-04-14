@@ -171,7 +171,8 @@ export type Client<ClassDO extends Record<string, any>> = {
  */
 export const client = <ClassDO extends CallableDurableObject>(
   ns: DurableObjectNamespaceIs<ClassDO>,
-  name: string | DurableObjectId | { id: string }
+  name: string | DurableObjectId | { id: string },
+  request?: Request
 ): Client<ClassDO> => {
   const stub =
     typeof name === "string"
@@ -197,7 +198,7 @@ export const client = <ClassDO extends CallableDurableObject>(
             ? ClassDO[Method]
             : never
         >
-      ) => call(obj, name, ...args);
+      ) => call(obj, request?.headers ?? new Headers(), name, ...args);
     },
   };
   return new Proxy(
@@ -285,6 +286,7 @@ const call = async <
   Method extends External<ClassDO>
 >(
   { stub }: Client<ClassDO>,
+  headers: Headers,
   method: Method,
   ...args: Parameters<ClassDO[Method]>
 ): Promise<
@@ -299,6 +301,7 @@ const call = async <
   const response = await stub.fetch(`${dummyOrigin}/${method}`, {
     body: JSON.stringify(args),
     method: "post",
+    headers,
   });
 
   // @ts-ignore
