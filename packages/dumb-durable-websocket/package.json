@@ -21,7 +21,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepublish": "pnpm build",
-    "build": "tsc --project ./tsconfig.json"
+    "build": "tsc --project ./tsconfig.build.json"
   },
   "keywords": [
     "Durable Object",

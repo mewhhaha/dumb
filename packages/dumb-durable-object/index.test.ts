@@ -22,7 +22,11 @@ const mockNamespace = <OBJECT extends CallableDurableObject>(
   const stub: DurableObjectStub = {
     id,
     fetch: async (input, init): Promise<Response> => {
-      return obj.fetch(new Request(input.toString(), init as RequestInit));
+      if (input instanceof Request) {
+        return obj.fetch(input);
+      }
+
+      return obj.fetch(new Request(input, init as RequestInit));
     },
   };
 
@@ -154,5 +158,26 @@ describe("durable object", () => {
       assertType<"error">(data);
       expect(data).toBe("error");
     }
+  });
+
+  test("can do get method request", async () => {
+    class DurableObject extends CallableDurableObject {
+      @callable
+      async f(value: "foo") {
+        return ok(200, `${value}bar`);
+      }
+    }
+
+    const obj = new DurableObject();
+
+    const ns = mockNamespace(obj);
+
+    const c = client([ns, new Request("http://t.com")], "name");
+    const response = await c.f("foo");
+    const data = await response.json();
+
+    expect(data).toBe("foobar");
+    expect(response.status).toBe(200);
+    expect(response.ok).toBe(true);
   });
 });

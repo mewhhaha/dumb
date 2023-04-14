@@ -229,8 +229,10 @@ export const client = <ClassDO extends CallableDurableObject>(
 export class CallableDurableObject implements DurableObject {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    const [_, method, base64] = url.pathname.split("/");
-    const args = base64 ? JSON.parse(btoa(base64)) : await request.json();
+    const [_, method, gargs] = url.pathname.split("/");
+    const args = gargs
+      ? JSON.parse(decodeURIComponent(gargs))
+      : await request.json();
 
     // @ts-expect-error Here we go!
     return await this[method as keyof this](...args);
@@ -308,8 +310,8 @@ const call = async <
 
   // Some requests require passing on the request as a GET-request like WebSocket upgrade
   if (method === "GET") {
-    const base64 = btoa(body);
-    const req = new Request(`${base}/${base64}`, { method, headers });
+    const encoded = encodeURIComponent(body);
+    const req = new Request(`${base}/${encoded}`, { method, headers });
 
     // @ts-ignore
     return await stub.fetch(req);
