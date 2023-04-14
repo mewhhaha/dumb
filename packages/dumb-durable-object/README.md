@@ -13,7 +13,7 @@ This is a simple example using the library.
 class DurableObjectExample extends CallableDurableObject {
   @callable // Decorator that ensures the type signature required for it to be callable
   helloWorld(name: string) {
-    return respond(`Hello world, ${name}!`);
+    return ok(200, `Hello world, ${name}!`);
   }
 }
 
@@ -31,7 +31,9 @@ export async function onRequest({
 }) {
   const id = "MY_DO_ID"; // Could also be a DurableObjectId
   const c = client(env.DO_EXAMPLE, id);
-  const [value] = await c.helloWorld("MY NAME"); // Absence of error makes it easy deconstruct the value
+  const response = await c.helloWorld("MY NAME"); // Absence of error makes the json() function always the successful one
+
+  const value = await response.json()
 
   return new Response(value, { status: 200 });
 }
@@ -47,7 +49,7 @@ class DurableObjectExample extends CallableDurableObject {
     if (name === "") {
       return error(422, { message: "Your name was empty!" });
     }
-    return respond(`Hello world, ${name}!`);
+    return ok(200, `Hello world, ${name}!`);
   }
 }
 
@@ -65,15 +67,17 @@ export async function onRequest({
 }) {
   const id = "MY_DO_ID"; // Could also be a DurableObjectId
   const c = client(env.DO_EXAMPLE, id);
-  const [value, err] = await c.helloWorld("MY NAME");
+  const response = await c.helloWorld("MY NAME");
 
   // Since it might return an error we have to disambiguate
-  if (err !== undefined) {
+  if (!response.ok) {
+    const err = await response.json();
     // value is of type { message: string }
-    return new Response(err.value.message, { status: err.status }); // Notice we get the error value here
+    return new Response(err.message, { status: response.status }); // Notice we get the error value here
   }
 
+  const value = await response.json()
   // value is of type string
-  return new Response(value, { status: 200 }); // Notice we get the successful value here
+  return new Response(value, { status: response.status }); // Notice we get the successful value here
 }
 ```
