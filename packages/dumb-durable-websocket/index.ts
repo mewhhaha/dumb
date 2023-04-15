@@ -10,12 +10,14 @@ export const ws = (): WebSocketPool => {
 
 export const close = (
   ws: WebSocketPool,
-  { code, reason }: Partial<WebSocketDisconnect> = {}
+  { code, reason, exclude = [] }: Partial<WebSocketClose> = {}
 ) => {
   const closing = ws.sessions;
-  ws.sessions = [];
+  const kept = ws.sessions.filter((w) => exclude.includes(w));
+  ws.sessions = kept;
 
   for (const session of closing) {
+    if (kept.includes(session)) continue;
     session.close(code, reason);
   }
 };
@@ -81,3 +83,9 @@ export const isWebSocketUpgrade = (request: Request) => {
 };
 
 export type WebSocketDisconnect = { code: number; reason: string };
+
+export type WebSocketClose = {
+  code: number;
+  reason: string;
+  exclude?: WebSocket[];
+};

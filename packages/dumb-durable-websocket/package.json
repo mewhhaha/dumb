@@ -1,7 +1,7 @@
 {
   "name": "dumb-durable-websocket",
   "author": "Jacob Torrång",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "license": "MIT",
   "description": "This is a package to more easier set up websockets with a durable object",
   "module": "dist/index.js",
