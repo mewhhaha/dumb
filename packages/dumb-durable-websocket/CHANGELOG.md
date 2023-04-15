@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ...
+
+## [0.0.6] - 2023-04-15
+
+### Added
+
+- Added ability to pass an array of websockets to disconnect in `disconnect`.
+
 ## [0.0.5] - 2023-04-10
 
 ### Changed

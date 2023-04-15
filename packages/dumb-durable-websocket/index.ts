@@ -46,11 +46,12 @@ export const accept = (
 
 export const disconnect = (
   ws: WebSocketPool,
-  websocket: WebSocket,
+  websocket: WebSocket | WebSocket[],
   { code, reason }: Partial<WebSocketDisconnect> = {}
 ) => {
-  websocket.close(code, reason);
-  ws.sessions = ws.sessions.filter((w) => w !== websocket);
+  const sockets = Array.isArray(websocket) ? websocket : [websocket];
+  sockets.forEach((w) => w.close(code, reason));
+  ws.sessions = ws.sessions.filter((w) => !sockets.includes(w));
 };
 
 export const broadcast = (
