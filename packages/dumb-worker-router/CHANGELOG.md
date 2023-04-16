@@ -9,10 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.3] - 2023-04-16
+### Added
+
+- Added `fetcher` method that can be injected with types from contstructed router for typed fetch calls
+- Basic type errors for accidentally overlapping patterns when making routes
+
 ## [0.0.2] - 2023-04-10
 ### Changed
 
 - Remove `trace` and `connect` from `Router` methods
+
 ## [0.0.1] - 2023-04-09
 ### Changed
 

@@ -151,4 +151,46 @@ describe("Router", () => {
     expect(response.status).toBe(200);
     expect(await response.text()).toBe("ab");
   });
+
+  test("error on same pattern", async () => {
+    Router()
+      .get("/a", () => {
+        return new Response(null, { status: 200 });
+      })
+      // @ts-expect-error
+      .get("/a", () => {
+        return new Response(null, { status: 200 });
+      });
+  });
+
+  test("error on overlapping params", async () => {
+    Router()
+      .get("/a/:param1", () => {
+        return new Response(null, { status: 200 });
+      })
+      // @ts-expect-error
+      .get("/a/:param2", () => {
+        return new Response(null, { status: 200 });
+      });
+  });
+
+  test("don't error on same pattern on different methods", async () => {
+    Router()
+      .get("/a", () => {
+        return new Response(null, { status: 200 });
+      })
+      .post("/a", () => {
+        return new Response(null, { status: 200 });
+      });
+  });
+
+  test("don't error on different overlapping params", async () => {
+    Router()
+      .get("/a/:param2/:param3", () => {
+        return new Response(null, { status: 200 });
+      })
+      .get("/a/:param1", () => {
+        return new Response(null, { status: 200 });
+      });
+  });
 });

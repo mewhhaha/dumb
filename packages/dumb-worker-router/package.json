@@ -1,7 +1,7 @@
 {
   "name": "dumb-worker-router",
   "author": "Jacob Torrång",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "description": "This is a package to more easier set up a router with workers",
   "module": "dist/index.js",
@@ -22,7 +22,7 @@
   "scripts": {
     "prepublish": "pnpm build",
     "test": "vitest",
-    "build": "tsc --project ./tsconfig.json"
+    "build": "tsc --project ./tsconfig.build.json"
   },
   "keywords": [
     "Worker",
@@ -32,9 +32,10 @@
   ],
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230404.0",
+    "dumb-typed-response": "workspace:^",
     "prettier": "^2.8.7",
     "typescript": "^5.0.4",
-    "vitest": "^0.30.0"
+    "vitest": "^0.30.1"
   },
   "engines": {
     "node": ">=18.13.0",

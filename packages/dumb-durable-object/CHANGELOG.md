@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.28] - 2023-04-16
+
+### Changed
+
+- Break out `TypedResponse` to `dumb-typed-response`
+- 
+
 ## [0.0.27] - 2023-04-15
 
 ### Fixed

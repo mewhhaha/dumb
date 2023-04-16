@@ -45,4 +45,18 @@ export default {
 }
 ```
 
+## Using typed fetcher
+```tsx
+import { Router } from 'dumb-router';
+
+const router = Router().get("/foo/:bar", 
+        ({ params }) => new Response(null, { status: 200 })
+        //    ^ will have type { bar: string }
+    )
+
+export default {
+  fetch: router.handle
+}
+```
+
 
