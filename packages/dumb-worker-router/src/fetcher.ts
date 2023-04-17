@@ -9,12 +9,14 @@ export const fetcher = <ROUTES extends Record<any, any>>(
   { origin }: FetcherOptions
 ): FetcherRouter<ROUTES> => {
   const cleanOrigin = new URL(origin).origin;
+  const fetchGeneric = (path: `/${string}`, init: RequestInit) => {
+    return fetchBase(`${cleanOrigin}${path}`, init);
+  };
 
   const handler: ProxyHandler<FetcherRouter<ROUTES>> = {
     get: <METHOD extends Method>(_: {}, method: METHOD | "fetch") => {
       if (method === "fetch") {
-        return (path: `/${string}`, init: RequestInit) =>
-          fetchBase(`${cleanOrigin}${path}`, init);
+        return fetchGeneric;
       }
 
       const fetchTyped = (
