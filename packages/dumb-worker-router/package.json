@@ -23,7 +23,7 @@
     "prepublish": "pnpm build",
     "test": "vitest",
     "build": "tsc --project ./tsconfig.build.json",
-    "lint": "eslint **/*.ts"
+    "lint": "eslint src/**/*.ts"
   },
   "keywords": [
     "Worker",

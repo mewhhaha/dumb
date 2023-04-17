@@ -20,7 +20,7 @@ export type Serialized<T> = T extends Date
   ? ISODateString
   : T extends (...args: any[]) => any
   ? undefined
-  : T extends Symbol
+  : T extends symbol
   ? undefined
   : T extends Map<any, any>
   ? Record<never, never>
