@@ -1,6 +1,6 @@
 {
   "name": "dumb-typed-response",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Type responses for dumb packages",
   "type": "module",
   "types": "dist/index.d.ts",
@@ -12,6 +12,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
+    "prepublish": "pnpm build",
     "build": "tsc --project tsconfig.build.json"
   },
   "keywords": [],
