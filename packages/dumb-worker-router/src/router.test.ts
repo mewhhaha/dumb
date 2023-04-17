@@ -171,7 +171,7 @@ describe("Router", () => {
       .get("/a", () => {
         return new Response(null, { status: 200 });
       })
-      // @ts-expect-error
+      //@ts-expect-error
       .get("/a", () => {
         return new Response(null, { status: 200 });
       });
@@ -182,7 +182,7 @@ describe("Router", () => {
       .get("/a/:param1", () => {
         return new Response(null, { status: 200 });
       })
-      // @ts-expect-error
+      //@ts-expect-error
       .get("/a/:param2", () => {
         return new Response(null, { status: 200 });
       });
@@ -190,7 +190,7 @@ describe("Router", () => {
 
   test("error on start middle pattern", async () => {
     Router()
-      // @ts-expect-error
+      //@ts-expect-error
       .get("/a/*/b", () => {
         return new Response(null, { status: 200 });
       });
@@ -198,7 +198,7 @@ describe("Router", () => {
 
   test("error on empty segment", async () => {
     Router()
-      // @ts-expect-error
+      //@ts-expect-error
       .get("/a//b", () => {
         return new Response(null, { status: 200 });
       });
@@ -206,7 +206,7 @@ describe("Router", () => {
 
   test("error on ending slash", async () => {
     Router()
-      // @ts-expect-error
+      //@ts-expect-error
       .get("/a/", () => {
         return new Response(null, { status: 200 });
       });
@@ -214,7 +214,7 @@ describe("Router", () => {
 
   test("error on missing start slash", async () => {
     Router().get(
-      // @ts-expect-error
+      //@ts-expect-error
       "a",
       () => new Response("bar", { status: 200 })
     );
