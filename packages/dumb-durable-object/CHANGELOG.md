@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
+## [0.0.30] - 2023-04-17
+
+### Added
+
+- Added `sideEffects` set to `false` in `package.json`
+
 ## [0.0.29] - 2023-04-17
 
 ### Changed

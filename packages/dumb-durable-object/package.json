@@ -1,7 +1,7 @@
 {
   "name": "dumb-durable-object",
   "author": "Jacob Torrång",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "license": "MIT",
   "description": "This is a package to make it easier to do rpc with your durable object by adding ways of typing and calling endpoints",
   "module": "dist/index.js",
@@ -42,5 +42,6 @@
   "engines": {
     "node": ">=18.13.0",
     "pnpm": ">=8.0.0"
-  }
+  },
+  "sideEffects": "false"
 }

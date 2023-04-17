@@ -50,13 +50,23 @@ export default {
 import { Router } from 'dumb-router';
 
 const router = Router().get("/foo/:bar", 
-        ({ params }) => new Response(null, { status: 200 })
-        //    ^ will have type { bar: string }
+        () => ok(200, "hello")
     )
+
+export type Routes = RoutesOf<typeof Router>
 
 export default {
   fetch: router.handle
 }
+
+// In client file
+import { Routes } from ...
+
+const f = fetcher<Routes>(fetch, { origin: "http://something.com" })
+
+const response = await f.get("/foo/:bar", { params: { bar: "my-cool-param" }})
+//                      ^ This is all typed from routes
+
 ```
 
 
