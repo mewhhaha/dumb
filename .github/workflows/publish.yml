@@ -29,6 +29,7 @@ jobs:
 
       - name: Publish all packages
         run: |
+          pnpm -r build
           pnpm -r publish --tag latest --access public
         env:
           NPM_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
