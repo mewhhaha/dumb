@@ -1,7 +1,7 @@
 {
   "name": "dumb-worker-router",
   "author": "Jacob Torrång",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "license": "MIT",
   "description": "This is a package to more easier set up a router with workers",
   "module": "dist/index.js",
@@ -44,5 +44,5 @@
     "node": ">=18.13.0",
     "pnpm": ">=8.0.0"
   },
-  "sideEffects": "false"
+  "sideEffects": false
 }
