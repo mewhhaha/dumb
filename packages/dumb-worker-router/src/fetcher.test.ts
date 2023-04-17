@@ -1,27 +1,17 @@
-import { assertType, describe, expect, test } from "vitest";
-import { Router, RoutesOf, WorkerRouter, fetcher } from "./index";
-import { ExecutionContext } from "@cloudflare/workers-types";
-import { error, ok } from "dumb-typed-response";
+import { describe, expect, test } from "vitest";
+import { Router, RoutesOf, fetcher } from "./index";
+import { ok } from "dumb-typed-response";
 
 describe("Router", () => {
-  const methods = [
-    "get",
-    "post",
-    "put",
-    "delete",
-    "patch",
-    "head",
-    "options",
-    "all",
-  ] as const;
-
   test("typed get fetch", async () => {
     const router = Router().get("/a", () => {
       return ok(200, "foobar");
     });
 
-    const fetchMock = async (url: string, init?: RequestInit) => {
-      return router.handle(new Request(url, init));
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
+      },
     };
 
     const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
@@ -39,8 +29,10 @@ describe("Router", () => {
       return ok(200, "foobar");
     });
 
-    const fetchMock = async (url: string, init?: RequestInit) => {
-      return router.handle(new Request(url, init));
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
+      },
     };
 
     const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
@@ -61,8 +53,10 @@ describe("Router", () => {
       }
     );
 
-    const fetchMock = async (url: string, init?: RequestInit) => {
-      return router.handle(new Request(url, init));
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
+      },
     };
 
     const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
@@ -85,8 +79,10 @@ describe("Router", () => {
       }
     );
 
-    const fetchMock = async (url: string, init?: RequestInit) => {
-      return router.handle(new Request(url, init));
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
+      },
     };
 
     const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
@@ -108,8 +104,10 @@ describe("Router", () => {
         return ok(200, param1);
       });
 
-    const fetchMock = async (url: string, init?: RequestInit) => {
-      return router.handle(new Request(url, init));
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
+      },
     };
 
     const f = fetcher<RoutesOf<typeof router>>(fetchMock, {

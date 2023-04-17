@@ -138,11 +138,6 @@ describe("durable object", () => {
       }
     }
 
-    const f = async (value: "ok" | "error") => {
-      if (value === "ok") return ok(201, "ok");
-      return error(401, "error");
-    };
-
     const obj = new DurableObject();
     const ns = mockNamespace(obj);
 

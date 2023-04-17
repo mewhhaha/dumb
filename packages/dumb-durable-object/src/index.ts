@@ -102,7 +102,7 @@ export const client = <ClassDO extends CallableDurableObject>(
 export class CallableDurableObject implements DurableObject {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    const [_, method, gargs] = url.pathname.split("/");
+    const [, method, gargs] = url.pathname.split("/");
     const args = gargs
       ? JSON.parse(decodeURIComponent(gargs))
       : await request.json();

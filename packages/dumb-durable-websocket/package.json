@@ -21,7 +21,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepublish": "pnpm build",
-    "build": "tsc --project ./tsconfig.build.json"
+    "build": "tsc --project ./tsconfig.build.json",
+    "lint": "eslint **/*.ts"
   },
   "keywords": [
     "Durable Object",
@@ -31,6 +32,8 @@
   ],
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230404.0",
+    "config": "workspace:^",
+    "eslint": "^8.38.0",
     "prettier": "^2.8.7",
     "typescript": "^5.0.4"
   },

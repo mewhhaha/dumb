@@ -20,7 +20,7 @@ export const Router = <REST extends unknown[]>(): RouteBuilder<
   const handler: ProxyHandler<RouteBuilder<REST, never, Record<never, never>>> =
     {
       get: <METHOD extends Method>(
-        _: {},
+        _: unknown,
         method: METHOD | "handle",
         proxy: ReturnType<typeof Router>
       ) => {
@@ -99,8 +99,6 @@ export type WorkerRouter<Env> = [Env, ExecutionContext];
 
 export type RoutesOf<ROUTER extends RouteBuilder<any, string, any>> =
   ROUTER extends RouteBuilder<any, string, infer ROUTES> ? ROUTES : never;
-
-type Path = `/${string}` | "*";
 
 type ValidatePattern<PATH extends string> = PATH extends "*"
   ? never
@@ -236,7 +234,7 @@ type RouteParameters<PATTERN extends string> =
     ? Record<NAME, string>
     : PATTERN extends `/${string}/${infer REST}`
     ? RouteParameters<`/${REST}`>
-    : {};
+    : Record<string, never>;
 
 type Route<REST extends unknown[]> = (
   segments: string[],
