@@ -158,10 +158,13 @@ export type ResponseNotOk<ERROR, STATUS> = Omit<
   json: () => Promise<ERROR>;
 };
 
-export type Result<R, E, C> = [E] extends [never]
-  ? ResponseOk<R, C>
-  : [R] extends [never]
-  ? ResponseNotOk<E, C>
-  :
-      | ResponseOk<R, Extract<C, HttpStatusOk>>
-      | ResponseNotOk<E, Exclude<C, HttpStatusOk>>;
+export type Result<T extends TypedResponse<any, any, any>> =
+  T extends TypedResponse<infer R, infer E, infer C>
+    ? [E] extends [never]
+      ? ResponseOk<R, C>
+      : [R] extends [never]
+      ? ResponseNotOk<E, C>
+      :
+          | ResponseOk<R, Extract<C, HttpStatusOk>>
+          | ResponseNotOk<E, Exclude<C, HttpStatusOk>>
+    : never;

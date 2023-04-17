@@ -5,7 +5,7 @@ export type DurableObjectNamespaceIs<OBJECT extends CallableDurableObject> =
 
 export type External<A extends Record<string, any>> = Extract<
   {
-    [Key in keyof A]: A[Key] extends Callable<infer R>
+    [Key in keyof A]: A[Key] extends Callable<infer R, any>
       ? [R] extends [Serialized<R>]
         ? Key
         : never
@@ -26,7 +26,7 @@ export type Client<ClassDO extends Record<string, any>> = {
       infer E,
       infer C
     >
-      ? Result<R, E, C>
+      ? Result<TypedResponse<R, E, C>>
       : never
   >;
 };
@@ -113,15 +113,9 @@ export class CallableDurableObject implements DurableObject {
 }
 
 export type Callable<
-  ARGUMENTS extends any[] = any[],
-  VALUE = any,
-  ERROR = any,
-  CODE = any
-> = (
-  ...args: Serialized<ARGUMENTS>
-) =>
-  | TypedResponse<VALUE, ERROR, CODE>
-  | Promise<TypedResponse<VALUE, ERROR, CODE>>;
+  ARGUMENTS extends any[],
+  RESPONSE extends Promise<TypedResponse<any, any, any>>
+> = (...args: Serialized<ARGUMENTS>) => RESPONSE;
 
 /** decorator for functions in classes to ensure the type signature
  * matches that which is expected from the client
@@ -140,8 +134,8 @@ export type Callable<
  *  }
  * ```
  * */
-export const callable = <const F extends Callable>(
-  originalMethod: F extends Callable<infer R>
+export const callable = <const F extends Callable<any, any>>(
+  originalMethod: F extends Callable<infer R, any>
     ? [R] extends [Serialized<R>]
       ? F
       : never
@@ -168,12 +162,12 @@ const call = async <
   classMethod: Method,
   ...args: Parameters<ClassDO[Method]>
 ): Promise<
-  Awaited<ReturnType<ClassDO[Method]>> extends TypedResponse<
-    infer R,
-    infer E,
-    infer C
+  Awaited<ReturnType<ClassDO[Method]>> extends infer T extends TypedResponse<
+    any,
+    any,
+    any
   >
-    ? Result<R, E, C>
+    ? Result<T>
     : never
 > => {
   const method = request?.method ?? "POST";

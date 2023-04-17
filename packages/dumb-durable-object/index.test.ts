@@ -2,12 +2,10 @@ import { assertType, describe, expect, test } from "vitest";
 import {
   CallableDurableObject,
   DurableObjectNamespaceIs,
-  body,
   callable,
   client,
-  error,
-  ok,
 } from "./index";
+import { ok, error, body } from "dumb-typed-response";
 
 const mockNamespace = <OBJECT extends CallableDurableObject>(
   obj: OBJECT
@@ -139,6 +137,11 @@ describe("durable object", () => {
         return error(401, "error");
       }
     }
+
+    const f = async (value: "ok" | "error") => {
+      if (value === "ok") return ok(201, "ok");
+      return error(401, "error");
+    };
 
     const obj = new DurableObject();
     const ns = mockNamespace(obj);
