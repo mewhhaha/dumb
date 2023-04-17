@@ -8,11 +8,11 @@ export const fetcher = <ROUTES extends Record<any, any>>(
   f: { fetch: (url: string, init?: RequestInit) => Promise<Response> },
   { origin }: FetcherOptions
 ): FetcherRouter<ROUTES> => {
-  const fetchBase = f.fetch;
+  f.fetch;
 
   const cleanOrigin = new URL(origin).origin;
   const fetchGeneric = (path: `/${string}`, init: RequestInit) => {
-    return fetchBase(`${cleanOrigin}${path}`, init);
+    return f.fetch(`${cleanOrigin}${path}`, init);
   };
 
   const handler: ProxyHandler<FetcherRouter<ROUTES>> = {
@@ -42,7 +42,7 @@ export const fetcher = <ROUTES extends Record<any, any>>(
           })
           .join("/");
 
-        return fetchBase(`${cleanOrigin}${replacedPath}`, { method, ...init });
+        return f.fetch(`${cleanOrigin}${replacedPath}`, { method, ...init });
       };
 
       return fetchTyped;

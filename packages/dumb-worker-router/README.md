@@ -62,7 +62,7 @@ export default {
 // In client file
 import { Routes } from ...
 
-const f = fetcher<Routes>(fetch, { origin: "http://something.com" })
+const f = fetcher<Routes>({ fetch }, { origin: "http://something.com" })
 
 const response = await f.get("/foo/:bar", { params: { bar: "my-cool-param" }})
                      // ^ This is all typed from routes

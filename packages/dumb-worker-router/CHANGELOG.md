@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ...
+## [0.0.10] - 2023-04-18
+
+### Fixed
+
+- Fixed illegal invocation for fetchers passed in
 
 ## [0.0.9] - 2023-04-17
 
