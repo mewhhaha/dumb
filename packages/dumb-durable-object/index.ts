@@ -37,7 +37,10 @@ export type Client<ClassDO extends Record<string, any>> = {
  * ```tsx
  * const id = "MY_DO_ID";
  * const c = client(context.MY_DO, id);
- * const value = await c.f("value")
+ * const response = await c.f("value")
+ * if (response.ok) {
+ *   console.log(await response.json())
+ * }
  * ```
  */
 export const client = <ClassDO extends CallableDurableObject>(
@@ -91,7 +94,7 @@ export const client = <ClassDO extends CallableDurableObject>(
  * class DurableObjectExample extends CallableDurableObject {
  *  @callable
  *  f(value: string) {
- *    return respond(value)
+ *    return ok(200, value)
  *  }
  * }
  * ```
@@ -133,7 +136,7 @@ export type Callable<
  *
  *  \@callable
  *  working(value: string) { // Doesn't give error since it matches the type
- *    return respond(value)
+ *    return ok(200, value)
  *  }
  * ```
  * */
