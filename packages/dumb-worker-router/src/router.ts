@@ -2,6 +2,7 @@ import { TypedResponse } from "dumb-typed-response";
 
 export const Router = <REST extends unknown[]>(): RouteBuilder<
   REST,
+  never,
   Record<never, never>
 > => {
   const routes: Route<REST>[] = [];
@@ -16,37 +17,41 @@ export const Router = <REST extends unknown[]>(): RouteBuilder<
     return new Response("Not Found", { status: 404 });
   };
 
-  const handler: ProxyHandler<RouteBuilder<REST, Record<never, never>>> = {
-    get: <METHOD extends Method>(
-      _: {},
-      method: METHOD | "handle",
-      proxy: ReturnType<typeof Router>
-    ) => {
-      if (method === "handle") {
-        return handle;
-      }
-
-      return <PATTERN extends Path>(
-        pattern: string,
-        h: RouteHandler<PATTERN, REST, any>
+  const handler: ProxyHandler<RouteBuilder<REST, never, Record<never, never>>> =
+    {
+      get: <METHOD extends Method>(
+        _: {},
+        method: METHOD | "handle",
+        proxy: ReturnType<typeof Router>
       ) => {
-        const patternSegments = pattern.split("/");
-        const route: Route<REST> = (segments, request, rest) => {
-          if (method !== "all" && request.method.toLowerCase() !== method)
-            return null;
+        if (method === "handle") {
+          return handle;
+        }
 
-          const params = match(segments, patternSegments);
-          if (params === null) return null;
+        return <PATTERN extends string>(
+          pattern: string,
+          h: RouteHandler<PATTERN, REST, any>
+        ) => {
+          const patternSegments = pattern.split("/");
+          const route: Route<REST> = (segments, request, rest) => {
+            if (method !== "all" && request.method.toLowerCase() !== method)
+              return null;
 
-          return h({ request, params }, ...rest);
+            const params = match(segments, patternSegments);
+            if (params === null) return null;
+
+            return h({ request, params }, ...rest);
+          };
+          routes.push(route);
+          return proxy;
         };
-        routes.push(route);
-        return proxy;
-      };
-    },
-  };
+      },
+    };
 
-  return new Proxy({} as RouteBuilder<REST, Record<never, never>>, handler);
+  return new Proxy(
+    {} as RouteBuilder<REST, never, Record<never, never>>,
+    handler
+  );
 };
 
 const match = (
@@ -56,14 +61,20 @@ const match = (
   if (pattern.length === 1 && pattern[0] === "*") {
     return { "*": segments.join("/") };
   }
-  if (segments.length !== pattern.length) return null;
+
+  if (!pattern.includes("*") && segments.length !== pattern.length) {
+    return null;
+  }
 
   const params: Record<string, string> = {};
 
   for (let i = 0; i < segments.length; i++) {
     const s = segments[i];
     const p = pattern[i];
-    if (p[0] === ":") {
+    if (p === "*") {
+      params["*"] = segments.slice(i).join("/");
+      return params;
+    } else if (p[0] === ":") {
       params[p.slice(1)] = s;
     } else if (s !== p) {
       return null;
@@ -86,25 +97,35 @@ export type Method =
 
 export type WorkerRouter<Env> = [Env, ExecutionContext];
 
-export type RoutesOf<ROUTER extends RouteBuilder<any, any>> =
-  ROUTER extends RouteBuilder<any, infer ROUTES> ? ROUTES : never;
+export type RoutesOf<ROUTER extends RouteBuilder<any, string, any>> =
+  ROUTER extends RouteBuilder<any, string, infer ROUTES> ? ROUTES : never;
 
 type Path = `/${string}` | "*";
 
-type ValidPattern<PATH extends Path> = PATH extends "*"
-  ? true
+type ValidatePattern<PATH extends string> = PATH extends "*"
+  ? never
   : PATH extends `/${infer SEGMENT}/${infer REST}`
   ? SEGMENT extends "*"
-    ? false
-    : ValidPattern<`/${REST}`>
-  : true;
+    ? TypeError<"Star pattern in wrong position">
+    : SEGMENT extends ""
+    ? TypeError<"Segment is empty">
+    : REST extends ""
+    ? TypeError<"Cannot end with slash">
+    : ValidatePattern<`/${REST}`>
+  : PATH extends `/${infer REST}`
+  ? REST extends ""
+    ? TypeError<"Cannot end with slash">
+    : never
+  : TypeError<"Missing slash at start">;
 
 type URLParameter<P extends string> = P extends `:${infer NAME}` ? NAME : never;
 
-type URLParameters<PATTERN extends Path> = PATTERN extends "*"
+type URLParameters<PATTERN extends string> = PATTERN extends "*"
   ? "*"
   : PATTERN extends ""
   ? never
+  : PATTERN extends `/*`
+  ? "*"
   : PATTERN extends `/${infer SEGMENT extends string}/${infer REST extends string}`
   ? URLParameter<SEGMENT> | URLParameters<`/${REST}`>
   : PATTERN extends `/${infer SEGMENT}`
@@ -123,7 +144,7 @@ type FetchHandler<REST extends unknown[]> = (
 ) => Response | Promise<Response>;
 
 type RouteHandler<
-  PATTERN extends Path,
+  PATTERN extends string,
   REST extends unknown[],
   RESPONSE extends ResponseAny
 > = (
@@ -134,68 +155,69 @@ type RouteHandler<
   ...rest: REST
 ) => RESPONSE;
 
-type RouteBuilder<REST extends unknown[], ROUTES extends Record<any, any>> = {
-  [METHOD in Method]: RouteConstructor<METHOD, REST, ROUTES>;
+type RouteBuilder<
+  REST extends unknown[],
+  USED_PATTERNS,
+  ROUTES extends Record<any, any>
+> = {
+  [METHOD in Method]: RouteConstructor<METHOD, REST, USED_PATTERNS, ROUTES>;
 } & {
   handle: FetchHandler<REST>;
 };
 
-type FunctionPattern<T> = T extends (path: infer P, ...rest: any[]) => any
-  ? P
-  : never;
-
 type StringifyParams<T extends string> = T extends "*"
-  ? "*"
+  ? string
   : T extends `/:${string}/${infer REST}`
-  ? `/${string}${StringifyParams<`/${REST}`>}`
+  ? `/${StringifyParams<`/${REST}`>}`
   : T extends `/:${string}`
-  ? `/${string}`
+  ? `/`
   : T extends `/${infer T}/${infer REST}`
-  ? `/${T}${StringifyParams<`/${REST}`>}`
+  ? T extends "*"
+    ? never
+    : `/${T}${StringifyParams<`/${REST}`>}`
   : T extends `/${infer T}`
-  ? `/${T}`
+  ? T extends "*"
+    ? `/${string}`
+    : `/${T}`
   : never;
 
-type StringifyRoute<KEY extends keyof ROUTE, ROUTE> = `${KEY extends string
-  ? KEY
-  : never}${FunctionPattern<ROUTE[KEY]> extends string
-  ? StringifyParams<FunctionPattern<ROUTE[KEY]>>
-  : never}`;
+type StringifyRoute<
+  METHOD extends Method,
+  PATTERN extends string
+> = `${METHOD}${StringifyParams<PATTERN>}`;
 
-type StringifyMethods<ROUTES extends Record<any, any>> = {
-  [KEY in keyof ROUTES]: StringifyRoute<KEY, ROUTES>;
-}[keyof ROUTES];
+type ValidateRoute<ROUTE, USED_PATTERNS> = Exclude<
+  ROUTE,
+  USED_PATTERNS
+> extends never
+  ? TypeError<"Overlapping pattern">
+  : never;
 
-type HasRoute<
-  ROUTE extends Record<any, any>,
-  ROUTES extends Record<any, any>
-> = Record<never, never> extends ROUTES
-  ? false
-  : StringifyMethods<ROUTE> extends StringifyMethods<ROUTES>
-  ? true
-  : false;
+type X = StringifyRoute<"get", "/:foo/*">;
 
 type RouteConstructor<
   METHOD extends Method,
   REST extends unknown[],
+  USED_PATTERNS,
   ROUTES extends Record<any, any>
-> = <PATTERN extends Path, RESPONSE extends ResponseAny>(
-  pattern: ValidPattern<PATTERN> extends true
-    ? HasRoute<
-        Record<METHOD, RouterFunction<PATTERN, RESPONSE>>,
-        ROUTES
-      > extends true
-      ? never
-      : PATTERN
-    : never,
+> = <PATTERN extends string, RESPONSE extends ResponseAny>(
+  pattern: ValidatePattern<PATTERN> extends never
+    ? ValidateRoute<
+        StringifyRoute<METHOD, PATTERN>,
+        USED_PATTERNS
+      > extends never
+      ? PATTERN
+      : ValidateRoute<StringifyRoute<METHOD, PATTERN>, USED_PATTERNS>
+    : ValidatePattern<PATTERN>,
   h: RouteHandler<PATTERN, REST, RESPONSE>
 ) => RouteBuilder<
   REST,
+  USED_PATTERNS | StringifyRoute<METHOD, PATTERN>,
   PATTERN extends "*"
     ? ROUTES
     : METHOD extends "all"
     ? ROUTES
-    : [ROUTES] extends [Record<never, never>]
+    : Record<never, never> extends ROUTES
     ? Record<METHOD, RouterFunction<PATTERN, RESPONSE>>
     : ROUTES & Record<METHOD, RouterFunction<PATTERN, RESPONSE>>
 >;
@@ -221,3 +243,7 @@ type Route<REST extends unknown[]> = (
   request: Request,
   rest: REST
 ) => Response | Promise<Response> | null;
+
+interface TypeError<M = any> {
+  __message: M & never;
+}

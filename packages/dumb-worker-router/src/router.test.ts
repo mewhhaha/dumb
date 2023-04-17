@@ -99,6 +99,20 @@ describe("Router", () => {
     expect(await response.text()).not.toBe("bar");
   });
 
+  test("matches ending catch all", async () => {
+    const router = Router().get(
+      "/foo/*",
+      ({ params: { "*": rest } }) => new Response(rest, { status: 200 })
+    );
+
+    const response = await router.handle(
+      new Request("http://t.co/foo/hello/world")
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("hello/world");
+  });
+
   test("parses params", async () => {
     const router = Router().get(
       "/get/:foo/:bar",
@@ -172,6 +186,38 @@ describe("Router", () => {
       .get("/a/:param2", () => {
         return new Response(null, { status: 200 });
       });
+  });
+
+  test("error on start middle pattern", async () => {
+    Router()
+      // @ts-expect-error
+      .get("/a/*/b", () => {
+        return new Response(null, { status: 200 });
+      });
+  });
+
+  test("error on empty segment", async () => {
+    Router()
+      // @ts-expect-error
+      .get("/a//b", () => {
+        return new Response(null, { status: 200 });
+      });
+  });
+
+  test("error on ending slash", async () => {
+    Router()
+      // @ts-expect-error
+      .get("/a/", () => {
+        return new Response(null, { status: 200 });
+      });
+  });
+
+  test("error on missing start slash", async () => {
+    Router().get(
+      // @ts-expect-error
+      "a",
+      () => new Response("bar", { status: 200 })
+    );
   });
 
   test("don't error on same pattern on different methods", async () => {
