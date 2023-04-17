@@ -5,9 +5,13 @@ type FetcherOptions = {
 };
 
 export const fetcher = <ROUTES extends Record<any, any>>(
-  fetchBase: (url: string, init?: RequestInit) => Promise<Response>,
+  f:
+    | ((url: string, init?: RequestInit) => Promise<Response>)
+    | { fetch: (url: string, init?: RequestInit) => Promise<Response> },
   { origin }: FetcherOptions
 ): FetcherRouter<ROUTES> => {
+  const fetchBase = "fetch" in f ? f.fetch : f;
+
   const cleanOrigin = new URL(origin).origin;
   const fetchGeneric = (path: `/${string}`, init: RequestInit) => {
     return fetchBase(`${cleanOrigin}${path}`, init);
