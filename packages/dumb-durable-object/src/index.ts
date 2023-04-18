@@ -1,4 +1,4 @@
-import { Result, Serialized, TypedResponse } from "dumb-typed-response";
+import { Serialized, TypedResponse } from "dumb-typed-response";
 
 export type DurableObjectNamespaceIs<OBJECT extends CallableDurableObject> =
   DurableObjectNamespace & { __type?: OBJECT & never };
@@ -20,15 +20,7 @@ export type Client<ClassDO extends Record<string, any>> = {
 } & { readonly __type?: ClassDO & never } & {
   [Key in External<ClassDO>]: (
     ...args: Parameters<ClassDO[Key]>
-  ) => Promise<
-    Awaited<ReturnType<ClassDO[Key]>> extends TypedResponse<
-      infer R,
-      infer E,
-      infer C
-    >
-      ? Result<TypedResponse<R, E, C>>
-      : never
-  >;
+  ) => Promise<Awaited<ReturnType<ClassDO[Key]>>>;
 };
 
 /**
@@ -161,15 +153,7 @@ const call = async <
   { stub, request }: Client<ClassDO>,
   classMethod: Method,
   ...args: Parameters<ClassDO[Method]>
-): Promise<
-  Awaited<ReturnType<ClassDO[Method]>> extends infer T extends TypedResponse<
-    any,
-    any,
-    any
-  >
-    ? Result<T>
-    : never
-> => {
+): Promise<Awaited<ReturnType<ClassDO[Method]>>> => {
   const method = request?.method ?? "POST";
   const headers = request?.headers ?? new Headers();
   const base = `${dummyOrigin}/${classMethod}`;

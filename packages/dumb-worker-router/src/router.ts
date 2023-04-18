@@ -1,4 +1,4 @@
-import { Result, TypedResponse } from "dumb-typed-response";
+import { TypedResponse } from "dumb-typed-response";
 
 export const Router = <REST extends unknown[]>(): RouteBuilder<
   REST,
@@ -223,9 +223,7 @@ type RouterFunction<PATTERN extends string, RESPONSE> = (
   ...init: Record<never, never> extends RouteParameters<PATTERN>
     ? [init?: Omit<RequestInit, "method">]
     : [init: { params: RouteParameters<PATTERN> } & Omit<RequestInit, "method">]
-) => Awaited<RESPONSE> extends TypedResponse<any, any, any>
-  ? Promise<Result<Awaited<RESPONSE>>>
-  : Promise<Awaited<RESPONSE>>;
+) => Promise<Awaited<RESPONSE>>;
 
 type RouteParameters<PATTERN extends string> =
   PATTERN extends `/:${infer NAME}/${infer REST}`

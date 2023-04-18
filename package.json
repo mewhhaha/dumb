@@ -1,10 +1,10 @@
 {
-  "private": true,
   "name": "dumb",
+  "private": true,
   "version": "0.0.0",
   "description": "Monorepo root",
   "scripts": {
-    "test": "turbo test",
+    "test": "CI=true turbo test",
     "build": "turbo build",
     "lint": "turbo lint"
   },

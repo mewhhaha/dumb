@@ -100,11 +100,11 @@ export type HttpStatusError = HttpStatus4XX | HttpStatus5XX;
 export type HttpStatusOther = HttpStatus1XX | HttpStatus2XX;
 export type HttpStatusOk = HttpStatus2XX;
 
-export type TypedResponse<VALUE, ERROR, CODE> = Response & {
-  __t: VALUE;
-  __e: ERROR;
-  __c: CODE;
-};
+export type TypedResponse<VALUE, ERROR, CODE> =
+  | (CODE extends HttpStatusOk ? ResponseOk<VALUE, CODE> : never)
+  | (CODE extends Exclude<HttpStatusAny, HttpStatusOk>
+      ? ResponseNotOk<ERROR, CODE>
+      : never);
 
 export const ok = <const CODE extends HttpStatusOk, const VALUE = null>(
   status: CODE,
@@ -157,14 +157,3 @@ export type ResponseNotOk<ERROR, STATUS> = Omit<
   ok: false;
   json: () => Promise<ERROR>;
 };
-
-export type Result<T extends TypedResponse<any, any, any>> =
-  T extends TypedResponse<infer R, infer E, infer C>
-    ? [E] extends [never]
-      ? ResponseOk<R, C>
-      : [R] extends [never]
-      ? ResponseNotOk<E, C>
-      :
-          | ResponseOk<R, Extract<C, HttpStatusOk>>
-          | ResponseNotOk<E, Exclude<C, HttpStatusOk>>
-    : never;

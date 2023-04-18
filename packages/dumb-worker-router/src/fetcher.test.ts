@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { assertType, describe, expect, test } from "vitest";
 import { Router, RoutesOf, fetcher } from "./index";
 import { ok } from "dumb-typed-response";
 
@@ -67,8 +67,11 @@ describe("Router", () => {
       params: { param1: "foo", param2: "bar" },
     });
 
+    const value = await response.json();
+    assertType<string>(value);
+
     expect(response.status).toBe(200);
-    expect(await response.json()).toBe("foobar");
+    expect(value).toBe("foobar");
   });
 
   test("generic fetch", async () => {
