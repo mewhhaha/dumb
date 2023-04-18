@@ -1,6 +1,6 @@
 {
   "name": "dumb-typed-response",
-  "version": "0.0.7",
+  "version": "1.0.0",
   "description": "Type responses for dumb packages",
   "type": "module",
   "types": "dist/index.d.ts",

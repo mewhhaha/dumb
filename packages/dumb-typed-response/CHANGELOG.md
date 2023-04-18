@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ...
 
-## [0.0.6] - 2023-04-17
+## [1.0.0] - 2023-04-18
+
+## [0.0.7] - 2023-04-17
 
 ### Added
 
 - Added `module` field
+
 ## [0.0.6] - 2023-04-17
 
 ### Fixed
