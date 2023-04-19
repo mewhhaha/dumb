@@ -27,7 +27,7 @@ describe("Router", () => {
     expect(await response.text()).toBe(method);
   });
 
-  test.each(methods)("%s doesn't match", async (method) => {
+  test.each(methods)("%s doesn't match when it shouldn't", async (method) => {
     const router = Router()[method](
       "/foo",
       () => new Response(method, { status: 200 })

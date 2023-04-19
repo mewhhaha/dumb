@@ -113,6 +113,7 @@ export const ok = <const CODE extends HttpStatusOk, const VALUE = null>(
 ): TypedResponse<Serialized<VALUE>, never, CODE> =>
   new Response(JSON.stringify(value ?? null), {
     status,
+    headers: { "Content-Type": "application/json", ...response?.headers },
     ...response,
   }) as unknown as TypedResponse<Serialized<VALUE>, never, CODE>;
 
@@ -137,6 +138,7 @@ export const error = <const CODE extends HttpStatusError, const ERROR = CODE>(
 ): TypedResponse<never, Serialized<ERROR>, CODE> =>
   new Response(JSON.stringify(value ?? status), {
     status,
+    headers: { "Content-Type": "application/json", ...response?.headers },
     ...response,
   }) as unknown as TypedResponse<never, Serialized<ERROR>, CODE>;
 

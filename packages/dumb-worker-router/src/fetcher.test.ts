@@ -1,8 +1,10 @@
 import { assertType, describe, expect, test } from "vitest";
 import { Router, RoutesOf, fetcher } from "./index";
 import { ok } from "dumb-typed-response";
+import z from "zod";
+import { type } from "arktype";
 
-describe("Router", () => {
+describe("Fetcher", () => {
   test("typed get fetch", async () => {
     const router = Router().get("/a", () => {
       return ok(200, "foobar");
@@ -136,35 +138,33 @@ describe("Router", () => {
       .get(
         "/get",
         () => ok(200),
-        //@ts-expect-error
+        // @ts-expect-error
         (v) => v
       )
       .head(
         "/head",
         () => ok(200),
-        //@ts-expect-error
+        // @ts-expect-error
         (v) => v
       )
       .options(
         "/options",
         () => ok(200),
-        //@ts-expect-error
+        // @ts-expect-error
         (v) => v
       )
       .all(
         "/all",
         () => ok(200),
-        //@ts-expect-error
+        // @ts-expect-error
         (v) => v
       );
   });
 
-  test.skip("can have validator for post", async () => {
-    const router = Router().post(
-      "/method",
-      () => ok(200),
-      (v: { hello: "world" }) => v
-    );
+  test.skip("can have zod validator for post", async () => {
+    const validator = z.object({ hello: z.literal("world") });
+
+    const router = Router().post("/method", () => ok(200), validator.parse);
 
     const f = fetcher<RoutesOf<typeof router>>(
       {
@@ -176,19 +176,24 @@ describe("Router", () => {
     f.post("/method", { value: { hello: "world" } });
   });
 
-  test.skip("can have validator and params for post", async () => {
+  test.skip("can have zod validator and params for post", async () => {
+    const validator = z.object({ hello: z.literal("world") });
+
     const router = Router().post(
       "/method/:name",
       ({ params: { name }, value }) => ok(200, value + " " + name),
-      (v: { hello: "world" }) => v
+      validator.parse
     );
 
-    const f = fetcher<RoutesOf<typeof router>>(
-      {
-        fetch: async () => new Response(),
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
       },
-      { origin: "http://t.co" }
-    );
+    };
+
+    const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
+      origin: "http://t.co",
+    });
 
     f.post("/method/:name", {
       value: { hello: "world" },
@@ -196,22 +201,99 @@ describe("Router", () => {
     });
   });
 
-  test.skip("validator works for post", async () => {
-    // Mark Zuckerberg used
+  test("zod validator works for post request", async () => {
+    const validator = z.object({ hello: z.literal("world") });
 
     const router = Router().post(
       "/method",
-      ({ value }) => ok(200, value + " " + name),
-      (v: { hello: "world" }) => v
+      ({ value }) => ok(200, value.hello),
+      validator.parse
     );
 
-    const f = fetcher<RoutesOf<typeof router>>(
-      {
-        fetch: async () => new Response(),
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
       },
-      { origin: "http://t.co" }
+    };
+
+    const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
+      origin: "http://t.co",
+    });
+
+    const response = await f.post("/method", { value: { hello: "world" } });
+
+    const value = await response.json();
+    assertType<"world">(value);
+    expect(value).toBe("world");
+  });
+
+  test("arktype validator works for post request", async () => {
+    const arktype = type({ hello: "'world'" });
+    const validator = (v: unknown) => {
+      const data = arktype(v).data;
+      if (data === undefined) {
+        throw new Error("invalid");
+      }
+      return data;
+    };
+
+    const router = Router().post(
+      "/method",
+      ({ value }) => ok(200, value.hello),
+      validator
     );
 
-    f.post("/method", { value: { hello: "world" } });
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
+      },
+    };
+
+    const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
+      origin: "http://t.co",
+    });
+
+    const response = await f.post("/method", { value: { hello: "world" } });
+
+    const value = await response.json();
+    assertType<"world">(value);
+    expect(value).toBe("world");
+  });
+
+  test.skip("can't use non-serializable types", async () => {
+    const validator = z.object({
+      hello: z.string().transform((_) => new Map()),
+    });
+
+    // @ts-expect-error
+    Router().post("/method", ({ value }) => ok(200, value.hello), validator);
+  });
+
+  test("returns 422 when validation fails", async () => {
+    const router = Router().post(
+      "/method",
+      ({ value }) => ok(200, value),
+      (v: unknown) => {
+        if (typeof v !== "string") {
+          throw new Error("invalid");
+        }
+        return v;
+      }
+    );
+
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
+      },
+    };
+
+    const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
+      origin: "http://t.co",
+    });
+
+    // This should never happen, but if it does it's a 422
+    // @ts-expect-error
+    const response = await f.post("/method", { value: {} });
+    expect(response.status).toBe(422);
   });
 });

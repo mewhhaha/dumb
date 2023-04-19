@@ -1,7 +1,7 @@
 {
   "name": "dumb-worker-router",
   "author": "Jacob Torrång",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "license": "MIT",
   "description": "This is a package to more easier set up a router with workers",
   "module": "dist/index.js",
@@ -33,12 +33,14 @@
   ],
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230404.0",
+    "arktype": "1.0.14-alpha",
     "config": "workspace:^",
     "dumb-typed-response": "workspace:^",
     "eslint": "^8.38.0",
     "prettier": "^2.8.7",
     "typescript": "^5.0.4",
-    "vitest": "^0.30.1"
+    "vitest": "^0.30.1",
+    "zod": "^3.21.4"
   },
   "peerDependencies": {
     "dumb-typed-response": "workspace:^"

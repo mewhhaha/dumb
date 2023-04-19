@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ...
+
+## [0.0.13] - 2023-04-20
+
+### Added
+
+- Added third parameter for a validator which will parse incoming `JSON` and also add a `value` property to the fetcher which has to be filled, and will subsequently be `JSON.stringify`-ied to the body.
+- Re-export `dumb-typed-response`
+
+
 ## [0.0.10] - 2023-04-18
 
 ### Fixed

@@ -47,6 +47,9 @@ export const fetcher = <ROUTES extends Record<any, any>>(
         return f.fetch(`${cleanOrigin}${replacedPath}`, {
           method,
           body: value ? JSON.stringify(value) : undefined,
+          headers: value
+            ? { ...init.headers, "Content-Type": "application/json" }
+            : init.headers,
           ...init,
         });
       };
