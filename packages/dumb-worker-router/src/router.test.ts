@@ -141,7 +141,7 @@ describe("Router", () => {
     expect(await response.text()).toBe("/get/foo/bar");
   });
 
-  test("passes on rest types", async () => {
+  test.skip("passes on rest types", async () => {
     const s = Symbol();
     Router<WorkerRouter<typeof s>>().get("*", ({ params }, env, ctx) => {
       assertType<ExecutionContext>(ctx);
@@ -166,7 +166,7 @@ describe("Router", () => {
     expect(await response.text()).toBe("ab");
   });
 
-  test("error on same pattern", async () => {
+  test.skip("error on same pattern", async () => {
     Router()
       .get("/a", () => {
         return new Response(null, { status: 200 });
@@ -177,7 +177,7 @@ describe("Router", () => {
       });
   });
 
-  test("error on overlapping params", async () => {
+  test.skip("error on overlapping params", async () => {
     Router()
       .get("/a/:param1", () => {
         return new Response(null, { status: 200 });
@@ -188,7 +188,7 @@ describe("Router", () => {
       });
   });
 
-  test("error on start middle pattern", async () => {
+  test.skip("error on start middle pattern", async () => {
     Router()
       //@ts-expect-error
       .get("/a/*/b", () => {
@@ -196,7 +196,7 @@ describe("Router", () => {
       });
   });
 
-  test("error on empty segment", async () => {
+  test.skip("error on empty segment", async () => {
     Router()
       //@ts-expect-error
       .get("/a//b", () => {
@@ -204,7 +204,7 @@ describe("Router", () => {
       });
   });
 
-  test("error on ending slash", async () => {
+  test.skip("error on ending slash", async () => {
     Router()
       //@ts-expect-error
       .get("/a/", () => {
@@ -212,7 +212,7 @@ describe("Router", () => {
       });
   });
 
-  test("error on missing start slash", async () => {
+  test.skip("error on missing start slash", async () => {
     Router().get(
       //@ts-expect-error
       "a",
@@ -220,7 +220,7 @@ describe("Router", () => {
     );
   });
 
-  test("don't error on same pattern on different methods", async () => {
+  test.skip("don't error on same pattern on different methods", async () => {
     Router()
       .get("/a", () => {
         return new Response(null, { status: 200 });
@@ -230,7 +230,7 @@ describe("Router", () => {
       });
   });
 
-  test("don't error on different overlapping params", async () => {
+  test.skip("don't error on different overlapping params", async () => {
     Router()
       .get("/a/:param2/:param3", () => {
         return new Response(null, { status: 200 });

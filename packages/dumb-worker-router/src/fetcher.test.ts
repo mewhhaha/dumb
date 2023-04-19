@@ -130,4 +130,88 @@ describe("Router", () => {
     expect(response2.status).toBe(200);
     expect(await response2.json()).toBe("foo");
   });
+
+  test.skip("can't have validator for get, head, options, all ", async () => {
+    Router()
+      .get(
+        "/get",
+        () => ok(200),
+        //@ts-expect-error
+        (v) => v
+      )
+      .head(
+        "/head",
+        () => ok(200),
+        //@ts-expect-error
+        (v) => v
+      )
+      .options(
+        "/options",
+        () => ok(200),
+        //@ts-expect-error
+        (v) => v
+      )
+      .all(
+        "/all",
+        () => ok(200),
+        //@ts-expect-error
+        (v) => v
+      );
+  });
+
+  test.skip("can have validator for post", async () => {
+    const router = Router().post(
+      "/method",
+      () => ok(200),
+      (v: { hello: "world" }) => v
+    );
+
+    const f = fetcher<RoutesOf<typeof router>>(
+      {
+        fetch: async () => new Response(),
+      },
+      { origin: "http://t.co" }
+    );
+
+    f.post("/method", { value: { hello: "world" } });
+  });
+
+  test.skip("can have validator and params for post", async () => {
+    const router = Router().post(
+      "/method/:name",
+      ({ params: { name }, value }) => ok(200, value + " " + name),
+      (v: { hello: "world" }) => v
+    );
+
+    const f = fetcher<RoutesOf<typeof router>>(
+      {
+        fetch: async () => new Response(),
+      },
+      { origin: "http://t.co" }
+    );
+
+    f.post("/method/:name", {
+      value: { hello: "world" },
+      params: { name: "name" },
+    });
+  });
+
+  test.skip("validator works for post", async () => {
+    // Mark Zuckerberg used
+
+    const router = Router().post(
+      "/method",
+      ({ value }) => ok(200, value + " " + name),
+      (v: { hello: "world" }) => v
+    );
+
+    const f = fetcher<RoutesOf<typeof router>>(
+      {
+        fetch: async () => new Response(),
+      },
+      { origin: "http://t.co" }
+    );
+
+    f.post("/method", { value: { hello: "world" } });
+  });
 });

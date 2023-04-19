@@ -1,7 +1,6 @@
 # Dumb Worker Router
 This is a small package to ease the friction when setting up a router for a `Cloudflare Worker`. The syntax is very similar to [`itty-router`](https://github.com/kwhitley/itty-router), but doesn't have as much functionality. But typings are good. 🔥
 
-
 ## Smallest example
 ```tsx
 import { Router } from 'dumb-router';
@@ -68,5 +67,7 @@ const response = await f.get("/foo/:bar", { params: { bar: "my-cool-param" }})
                      // ^ This is all typed from routes
 
 ```
+
+
 
 

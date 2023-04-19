@@ -25,24 +25,30 @@ export const fetcher = <ROUTES extends Record<any, any>>(
         path: `/${string}`,
         {
           params,
+          value,
           ...init
         }: Omit<RequestInit, "method"> & {
           params?: Record<string, string>;
+          value?: unknown;
         } = {}
       ) => {
         const segments = path.split("/");
         const replacedPath = segments
           .map((segment) => {
             if (!segment.startsWith(":")) return segment;
-            const value = params?.[segment.slice(1)];
-            if (value === undefined) {
+            const v = params?.[segment.slice(1)];
+            if (v === undefined) {
               throw new Error("Missing parameter " + segment);
             }
-            return value;
+            return v;
           })
           .join("/");
 
-        return f.fetch(`${cleanOrigin}${replacedPath}`, { method, ...init });
+        return f.fetch(`${cleanOrigin}${replacedPath}`, {
+          method,
+          body: value ? JSON.stringify(value) : undefined,
+          ...init,
+        });
       };
 
       return fetchTyped;

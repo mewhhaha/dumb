@@ -1,4 +1,4 @@
-import { TypedResponse } from "dumb-typed-response";
+import { Serialized, TypedResponse } from "dumb-typed-response";
 
 export const Router = <REST extends unknown[]>(): RouteBuilder<
   REST,
@@ -30,17 +30,26 @@ export const Router = <REST extends unknown[]>(): RouteBuilder<
 
         return <PATTERN extends string>(
           pattern: string,
-          h: RouteHandler<PATTERN, REST, any>
+          h: RouteHandler<PATTERN, REST, any, unknown, unknown>,
+          validator?: (value: unknown) => unknown
         ) => {
           const patternSegments = pattern.split("/");
-          const route: Route<REST> = (segments, request, rest) => {
+          const route: Route<REST> = async (segments, request, rest) => {
             if (method !== "all" && request.method.toLowerCase() !== method)
               return null;
 
             const params = match(segments, patternSegments);
             if (params === null) return null;
 
-            return h({ request, params }, ...rest);
+            let j = undefined;
+            if (validator) {
+              try {
+                j = await request.json().then(validator);
+              } catch {
+                return new Response("Bad Request", { status: 422 });
+              }
+            }
+            return h({ request, params, value: j }, ...rest);
           };
           routes.push(route);
           return proxy;
@@ -100,35 +109,40 @@ export type WorkerRouter<Env> = [Env, ExecutionContext];
 export type RoutesOf<ROUTER extends RouteBuilder<any, string, any>> =
   ROUTER extends RouteBuilder<any, string, infer ROUTES> ? ROUTES : never;
 
+const VALID = Symbol();
+const UNUSED = Symbol();
+const ERROR = Symbol();
+
 type ValidatePattern<PATH extends string> = PATH extends "*"
-  ? never
+  ? typeof VALID
   : PATH extends `/${infer SEGMENT}/${infer REST}`
   ? SEGMENT extends "*"
-    ? TypeError<"Star pattern in wrong position">
+    ? RouterError<"Star pattern in wrong position">
     : SEGMENT extends ""
-    ? TypeError<"Segment is empty">
+    ? RouterError<"Segment is empty">
     : REST extends ""
-    ? TypeError<"Cannot end with slash">
+    ? RouterError<"Cannot end with slash">
     : ValidatePattern<`/${REST}`>
   : PATH extends `/${infer REST}`
   ? REST extends ""
-    ? TypeError<"Cannot end with slash">
-    : never
-  : TypeError<"Missing slash at start">;
+    ? RouterError<"Cannot end with slash">
+    : typeof VALID
+  : RouterError<"Missing slash at start">;
 
 type URLParameter<P extends string> = P extends `:${infer NAME}` ? NAME : never;
 
-type URLParameters<PATTERN extends string> = PATTERN extends "*"
-  ? "*"
-  : PATTERN extends ""
-  ? never
-  : PATTERN extends `/*`
-  ? "*"
-  : PATTERN extends `/${infer SEGMENT extends string}/${infer REST extends string}`
-  ? URLParameter<SEGMENT> | URLParameters<`/${REST}`>
-  : PATTERN extends `/${infer SEGMENT}`
-  ? URLParameter<SEGMENT>
-  : never;
+type URLParameters<PATTERN extends string> =
+  PATTERN extends `/${infer SEGMENT}/${infer REST}`
+    ? URLParameter<SEGMENT> | URLParameters<`/${REST}`>
+    : PATTERN extends `/${infer SEGMENT}`
+    ? URLParameter<SEGMENT>
+    : PATTERN extends "*"
+    ? "*"
+    : PATTERN extends ""
+    ? never
+    : PATTERN extends `/*`
+    ? "*"
+    : never;
 
 type ResponseAny =
   | TypedResponse<any, any, any>
@@ -144,12 +158,14 @@ type FetchHandler<REST extends unknown[]> = (
 type RouteHandler<
   PATTERN extends string,
   REST extends unknown[],
-  RESPONSE extends ResponseAny
+  RESPONSE extends ResponseAny,
+  FROM,
+  TO
 > = (
   context: {
     request: Request;
     params: Record<URLParameters<PATTERN>, string>;
-  },
+  } & (TO extends never ? Record<string, never> : { value: FROM }),
   ...rest: REST
 ) => RESPONSE;
 
@@ -188,24 +204,37 @@ type ValidateRoute<ROUTE, USED_PATTERNS> = Exclude<
   ROUTE,
   USED_PATTERNS
 > extends never
-  ? TypeError<"Overlapping pattern">
-  : never;
+  ? RouterError<"Overlapping pattern">
+  : typeof VALID;
 
 type RouteConstructor<
   METHOD extends Method,
   REST extends unknown[],
   USED_PATTERNS,
   ROUTES extends Record<any, any>
-> = <PATTERN extends string, RESPONSE extends ResponseAny>(
-  pattern: ValidatePattern<PATTERN> extends never
+> = <
+  PATTERN extends string,
+  RESPONSE extends ResponseAny,
+  FROM extends Serialized<any>,
+  TO = typeof UNUSED
+>(
+  pattern: ValidatePattern<PATTERN> extends typeof VALID
     ? ValidateRoute<
         StringifyRoute<METHOD, PATTERN>,
         USED_PATTERNS
-      > extends never
+      > extends typeof VALID
       ? PATTERN
       : ValidateRoute<StringifyRoute<METHOD, PATTERN>, USED_PATTERNS>
     : ValidatePattern<PATTERN>,
-  h: RouteHandler<PATTERN, REST, RESPONSE>
+  h: RouteHandler<PATTERN, REST, RESPONSE, FROM, TO>,
+  ...validator: Exclude<
+    METHOD,
+    "get" | "head" | "all" | "options"
+  > extends never
+    ? []
+    : TO extends typeof UNUSED
+    ? []
+    : [validator: (value: FROM) => TO]
 ) => RouteBuilder<
   REST,
   USED_PATTERNS | StringifyRoute<METHOD, PATTERN>,
@@ -214,15 +243,28 @@ type RouteConstructor<
     : METHOD extends "all"
     ? ROUTES
     : Record<never, never> extends ROUTES
-    ? Record<METHOD, RouterFunction<PATTERN, RESPONSE>>
-    : ROUTES & Record<METHOD, RouterFunction<PATTERN, RESPONSE>>
+    ? Record<METHOD, RouterFunction<PATTERN, RESPONSE, FROM, TO>>
+    : ROUTES & Record<METHOD, RouterFunction<PATTERN, RESPONSE, FROM, TO>>
 >;
 
-type RouterFunction<PATTERN extends string, RESPONSE> = (
+type RouterFunction<PATTERN extends string, RESPONSE, FROM, TO> = (
   url: PATTERN,
   ...init: Record<never, never> extends RouteParameters<PATTERN>
-    ? [init?: Omit<RequestInit, "method">]
-    : [init: { params: RouteParameters<PATTERN> } & Omit<RequestInit, "method">]
+    ? TO extends typeof UNUSED
+      ? [init?: Omit<RequestInit, "method">]
+      : [
+          init: {
+            value: FROM;
+          } & Omit<RequestInit, "method" | "body">
+        ]
+    : TO extends typeof UNUSED
+    ? [init: { params: RouteParameters<PATTERN> } & Omit<RequestInit, "method">]
+    : [
+        init: {
+          params: RouteParameters<PATTERN>;
+          value: FROM;
+        } & Omit<RequestInit, "method" | "body">
+      ]
 ) => Promise<Awaited<RESPONSE>>;
 
 type RouteParameters<PATTERN extends string> =
@@ -240,6 +282,7 @@ type Route<REST extends unknown[]> = (
   rest: REST
 ) => Response | Promise<Response> | null;
 
-interface TypeError<M = any> {
-  __message: M & never;
-}
+type RouterError<M = any> = {
+  type: typeof ERROR;
+  message: M;
+};
