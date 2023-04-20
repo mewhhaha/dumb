@@ -1,4 +1,9 @@
-import { Serialized, TypedResponse } from "dumb-typed-response";
+import {
+  ResponseNotOk,
+  Serialized,
+  TypedResponse,
+  error,
+} from "dumb-typed-response";
 
 const VALID = Symbol();
 const UNUSED = Symbol();
@@ -58,8 +63,12 @@ export const Router = <REST extends unknown[]>(): RouteBuilder<
             if (validator) {
               try {
                 j = await request.json().then(validator);
-              } catch {
-                return new Response("Unprocessable Entity", { status: 422 });
+              } catch (err) {
+                if (err instanceof Error) {
+                  return error(422, err.message);
+                } else {
+                  return error(422);
+                }
               }
             }
             return h({ request, params, value: j }, ...rest);
@@ -261,7 +270,11 @@ type RouterFunction<PATTERN extends string, RESPONSE, TO> = (
           ? RequestInitWithValue<TO>
           : RequestInitWithParams<PATTERN> & RequestInitWithValue<TO>
       ]
-) => Promise<Awaited<RESPONSE>>;
+) => Promise<
+  Awaited<
+    RESPONSE | (TO extends typeof UNUSED ? never : ResponseNotOk<string, 422>)
+  >
+>;
 
 type RouteParameters<PATTERN extends string> =
   PATTERN extends `/:${infer NAME}/${infer REST}`

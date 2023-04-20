@@ -221,10 +221,42 @@ describe("Fetcher", () => {
     });
 
     const response = await f.post("/method", { value: { hello: "world" } });
+    if (response.ok) {
+      const value = await response.json();
+      assertType<"world">(value);
+      expect(value).toBe("world");
+    } else {
+      assertType<unknown>(await response.json());
+    }
+  });
 
-    const value = await response.json();
-    assertType<"world">(value);
-    expect(value).toBe("world");
+  test("zod validator returns 422 for invalid request", async () => {
+    const validator = z.object({ hello: z.number().min(1) });
+
+    const router = Router().post(
+      "/method",
+      ({ value }) => ok(200, value.hello),
+      validator.parse
+    );
+
+    const fetchMock = {
+      fetch: async (url: string, init?: RequestInit) => {
+        return router.handle(new Request(url, init));
+      },
+    };
+
+    const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
+      origin: "http://t.co",
+    });
+
+    const response = await f.post("/method", { value: { hello: 0 } });
+    if (response.ok) {
+      assertType<number>(await response.json());
+    } else {
+      const value = await response.json();
+      assertType<unknown>(value);
+      expect(JSON.parse(value)[0].code).toBe("too_small");
+    }
   });
 
   test("arktype validator works for post request", async () => {
@@ -255,9 +287,13 @@ describe("Fetcher", () => {
 
     const response = await f.post("/method", { value: { hello: "world" } });
 
-    const value = await response.json();
-    assertType<"world">(value);
-    expect(value).toBe("world");
+    if (response.ok) {
+      const value = await response.json();
+      assertType<"world">(value);
+      expect(value).toBe("world");
+    } else {
+      assertType<unknown>(await response.json());
+    }
   });
 
   test.skip("can't use non-serializable types", async () => {
