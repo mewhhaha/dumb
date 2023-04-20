@@ -1,15 +1,13 @@
 import { Method } from "./router";
 
 type FetcherOptions = {
-  origin: string;
+  origin?: string;
 };
 
 export const fetcher = <ROUTES extends Record<any, any>>(
   f: { fetch: (url: string, init?: RequestInit) => Promise<Response> },
-  { origin }: FetcherOptions
+  { origin = "http://from.fetcher" }: FetcherOptions = {}
 ): FetcherRouter<ROUTES> => {
-  f.fetch;
-
   const cleanOrigin = new URL(origin).origin;
   const fetchGeneric = (path: `/${string}`, init: RequestInit) => {
     return f.fetch(`${cleanOrigin}${path}`, init);
