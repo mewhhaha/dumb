@@ -20,13 +20,20 @@ export const Router = <REST extends unknown[]>(): RouteBuilder<
     const url = new URL(request.url);
     const segments = url.pathname.split("/");
     for (const route of routes) {
-      const response = await route(segments, request, rest);
-      if (response !== null) {
-        return response;
+      try {
+        const response = await route(segments, request, rest);
+        if (response !== null) {
+          return response;
+        }
+      } catch (err) {
+        if (err instanceof Error) {
+          return new Response(err.message, { status: 500 });
+        }
+        return new Response(null, { status: 500 });
       }
     }
 
-    return new Response("Not Found", { status: 404 });
+    return new Response(null, { status: 500 });
   };
 
   const handler: ProxyHandler<RouteBuilder<REST, never, Record<never, never>>> =
@@ -66,9 +73,8 @@ export const Router = <REST extends unknown[]>(): RouteBuilder<
               } catch (err) {
                 if (err instanceof Error) {
                   return error(422, err.message);
-                } else {
-                  return error(422);
                 }
+                return error(422);
               }
             }
             return h({ request, params, value: j }, ...rest);
