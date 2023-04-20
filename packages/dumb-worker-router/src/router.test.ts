@@ -28,10 +28,10 @@ describe("Router", () => {
   });
 
   test.each(methods)("%s doesn't match when it shouldn't", async (method) => {
-    const router = Router()[method](
-      "/foo",
-      () => new Response(method, { status: 200 })
-    );
+    const router = Router()
+      // eslint-disable-next-line no-unexpected-multiline
+      [method]("/foo", () => new Response(method, { status: 200 }))
+      .all("*", () => new Response(null, { status: 404 }));
 
     const response = await router.handle(
       new Request("http://t.co/bar", { method })
@@ -95,7 +95,7 @@ describe("Router", () => {
       new Request("http://t.co/foo", { method: "post" })
     );
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(500);
     expect(await response.text()).not.toBe("bar");
   });
 
