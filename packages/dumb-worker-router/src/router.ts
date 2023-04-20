@@ -253,24 +253,23 @@ type RouteConstructor<
     : ROUTES & Record<METHOD, RouterFunction<PATTERN, RESPONSE, TO>>
 >;
 
-type RequestInitWithParams<PATTERN extends string> = {
-  params: RouteParameters<PATTERN>;
-} & Omit<RequestInit, "method">;
-type RequestInitWithValue<TO> = { value: TO } & Omit<
-  RequestInit,
-  "method" | "body"
->;
-
 type RouterFunction<PATTERN extends string, RESPONSE, TO> = (
   url: PATTERN,
   ...init: TO extends typeof UNUSED
     ? IsEmpty<RouteParameters<PATTERN>> extends true
       ? [init?: Omit<RequestInit, "method">]
-      : [init: RequestInitWithParams<PATTERN>]
+      : [
+          init: {
+            params: RouteParameters<PATTERN>;
+          } & Omit<RequestInit, "method">
+        ]
     : [
         init: IsEmpty<RouteParameters<PATTERN>> extends true
-          ? RequestInitWithValue<TO>
-          : RequestInitWithParams<PATTERN> & RequestInitWithValue<TO>
+          ? { value: TO } & Omit<RequestInit, "method" | "body">
+          : { params: RouteParameters<PATTERN>; value: TO } & Omit<
+              RequestInit,
+              "method" | "body"
+            >
       ]
 ) => Promise<
   Awaited<
