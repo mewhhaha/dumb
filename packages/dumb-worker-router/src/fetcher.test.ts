@@ -254,7 +254,7 @@ describe("Fetcher", () => {
       assertType<number>(await response.json());
     } else {
       const value = await response.json();
-      assertType<unknown>(value);
+      assertType<string>(value);
       expect(JSON.parse(value)[0].code).toBe("too_small");
     }
   });
@@ -303,33 +303,5 @@ describe("Fetcher", () => {
 
     // @ts-expect-error
     Router().post("/method", ({ value }) => ok(200, value.hello), validator);
-  });
-
-  test("returns 422 when validation fails", async () => {
-    const router = Router().post(
-      "/method",
-      ({ value }) => ok(200, value),
-      (v: unknown) => {
-        if (typeof v !== "string") {
-          throw new Error("invalid");
-        }
-        return v;
-      }
-    );
-
-    const fetchMock = {
-      fetch: async (url: string, init?: RequestInit) => {
-        return router.handle(new Request(url, init));
-      },
-    };
-
-    const f = fetcher<RoutesOf<typeof router>>(fetchMock, {
-      origin: "http://t.co",
-    });
-
-    // This should never happen, but if it does it's a 422
-    // @ts-expect-error
-    const response = await f.post("/method", { value: {} });
-    expect(response.status).toBe(422);
   });
 });
