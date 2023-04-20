@@ -1,5 +1,9 @@
 import { Serialized, TypedResponse } from "dumb-typed-response";
 
+const VALID = Symbol();
+const UNUSED = Symbol();
+const ERROR = Symbol();
+
 export const Router = <REST extends unknown[]>(): RouteBuilder<
   REST,
   never,
@@ -112,10 +116,6 @@ export type WorkerRouter<Env> = [Env, ExecutionContext];
 export type RoutesOf<ROUTER extends RouteBuilder<any, string, any>> =
   ROUTER extends RouteBuilder<any, string, infer ROUTES> ? ROUTES : never;
 
-const VALID = Symbol();
-const UNUSED = Symbol();
-const ERROR = Symbol();
-
 type ValidatePattern<PATH extends string> = PATH extends "*"
   ? typeof VALID
   : PATH extends `/${infer SEGMENT}/${infer REST}`
@@ -166,7 +166,7 @@ type RouteHandler<
   context: {
     request: Request;
     params: Record<URLParameters<PATTERN>, string>;
-  } & (TO extends typeof UNUSED ? any : { value: TO }),
+  } & (TO extends typeof UNUSED ? Record<never, never> : { value: TO }),
   ...rest: REST
 ) => RESPONSE;
 
@@ -186,14 +186,12 @@ type StringifyParams<T extends string> = T extends "*"
   ? `/${StringifyParams<`/${REST}`>}`
   : T extends `/:${string}`
   ? `/`
-  : T extends `/${infer T}/${infer REST}`
-  ? T extends "*"
-    ? never
-    : `/${T}${StringifyParams<`/${REST}`>}`
-  : T extends `/${infer T}`
-  ? T extends "*"
+  : T extends `/${infer SEGMENT}/${infer REST}`
+  ? `/${SEGMENT}${StringifyParams<`/${REST}`>}`
+  : T extends `/${infer SEGMENT}`
+  ? SEGMENT extends "*"
     ? `/${string}`
-    : `/${T}`
+    : `/${SEGMENT}`
   : never;
 
 type StringifyRoute<
@@ -242,24 +240,22 @@ type RouteConstructor<
     : ROUTES & Record<METHOD, RouterFunction<PATTERN, RESPONSE, TO>>
 >;
 
+type RequestInitWithoutMethod = Omit<RequestInit, "method">;
+type RequestInitWithParams<PATTERN extends string> = {
+  params: RouteParameters<PATTERN>;
+} & RequestInitWithoutMethod;
+type RequestInitWithValue<TO> = { value: TO } & RequestInitWithoutMethod;
+
 type RouterFunction<PATTERN extends string, RESPONSE, TO> = (
   url: PATTERN,
   ...init: TO extends typeof UNUSED
     ? IsEmpty<RouteParameters<PATTERN>> extends true
-      ? [init?: Omit<RequestInit, "method">]
-      : [
-          init: { params: RouteParameters<PATTERN> } & Omit<
-            RequestInit,
-            "method"
-          >
-        ]
-    : IsEmpty<RouteParameters<PATTERN>> extends true
-    ? [init: { value: TO } & Omit<RequestInit, "method">]
+      ? [init?: RequestInitWithoutMethod]
+      : [init: RequestInitWithParams<PATTERN>]
     : [
-        init: { value: TO; params: RouteParameters<PATTERN> } & Omit<
-          RequestInit,
-          "method"
-        >
+        init: IsEmpty<RouteParameters<PATTERN>> extends true
+          ? RequestInitWithValue<TO>
+          : RequestInitWithParams<PATTERN> & RequestInitWithValue<TO>
       ]
 ) => Promise<Awaited<RESPONSE>>;
 
