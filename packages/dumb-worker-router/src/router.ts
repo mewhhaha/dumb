@@ -28,10 +28,10 @@ export const Router = <REST extends unknown[]>(): RouteBuilder<
     {
       get: <METHOD extends Method>(
         _: unknown,
-        method: METHOD | "handle",
+        property: METHOD | "handle",
         proxy: ReturnType<typeof Router>
       ) => {
-        if (method === "handle") {
+        if (property === "handle") {
           return handle;
         }
 
@@ -42,7 +42,10 @@ export const Router = <REST extends unknown[]>(): RouteBuilder<
         ) => {
           const patternSegments = pattern.split("/");
           const route: Route<REST> = async (segments, request, rest) => {
-            if (method !== "all" && request.method.toLowerCase() !== method) {
+            if (
+              property !== "all" &&
+              request.method.toLowerCase() !== property
+            ) {
               return null;
             }
 
@@ -56,7 +59,7 @@ export const Router = <REST extends unknown[]>(): RouteBuilder<
               try {
                 j = await request.json().then(validator);
               } catch {
-                return new Response("Bad Request", { status: 422 });
+                return new Response("Unprocessable Entity", { status: 422 });
               }
             }
             return h({ request, params, value: j }, ...rest);
@@ -100,7 +103,7 @@ const match = (
   return params;
 };
 
-export type Method =
+export type HttpMethod =
   | "get"
   | "post"
   | "delete"
@@ -108,8 +111,9 @@ export type Method =
   | "head"
   | "put"
   | "patch"
-  | "head"
-  | "all";
+  | "head";
+
+export type Method = HttpMethod | "all";
 
 export type WorkerRouter<Env> = [Env, ExecutionContext];
 
